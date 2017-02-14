@@ -11,7 +11,16 @@
     tools:context="edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.MainActivity">
 
     <TextView
+        android:id="@+id/text0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Hello World!" />
+
+    <TextView
+        android:id="@+id/text1"
+        android:layout_below="@+id/text0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:isScrollContainer="true"
         android:text="Hello World!" />
 </RelativeLayout>

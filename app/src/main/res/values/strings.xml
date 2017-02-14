@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Firebase Realtime Demo</string>
+    <string name="loading">Loading...</string>
+    <string name="firebase_logo_and_name">Firebase logo and name</string>
+    <string name="anonymous_sign_in">Anonymous Sign In</string>
+    <string name="signed_out">Signed Out</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="account_linking">Account Linking</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="link_account">Link Account</string>
+    <string name="title_activity_anonymous_auth">AnonymousAuthActivity</string>
+    <string name="id_fmt">User ID: %s</string>
+    <string name="email_fmt">Email: %s</string>
 </resources>
