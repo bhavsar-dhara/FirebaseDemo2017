@@ -38,12 +38,16 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.xml.sax.InputSource;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -329,73 +333,31 @@ public class AnonymousAuthActivity extends BaseActivity implements
 
         byte[] buffer = new byte[1024];
 
-        InputStream is;
-        GZIPInputStream zis;
+        InputStream fis;
+        GZIPInputStream gis;
         try {
-            String filename;
-            is = new FileInputStream(INPUT_GZIP_FILE);
-            zis = new GZIPInputStream(new BufferedInputStream(is));
-//            ZipEntry ze;
-//            int count;
-            FileOutputStream fout = null;
-            while (zis.available() != 0) {
-                fout = new FileOutputStream(OUTPUT_FILE);
-                for (int c = zis.read(); c != -1; c = zis.read()) {
-                    fout.write(c);
-                }
-            }
-            if(fout != null) {
-                fout.flush();
-                fout.close();
+            fis = new FileInputStream(INPUT_GZIP_FILE);
+            gis = new GZIPInputStream(new BufferedInputStream(fis));
+
+            InputSource is = new InputSource(gis);
+            InputStream input = new BufferedInputStream(is.getByteStream());
+            OutputStream fout = new FileOutputStream(OUTPUT_FILE);
+            byte data[] = new byte[2097152];
+            long total = 0;
+            int count;
+
+            while ((count = input.read(data)) != -1) {
+                total += count;
+                fout.write(data, 0, count);
             }
 
-//            while ((ze = zis.getNextEntry()) != null) {
-//                filename = ze.getName();
-//                Log.d(TAG, "gunZipIt: filename: " + filename);
-//                Log.d(TAG, "gunZipIt: " + path + "/" + filename);
-//
-//                // Need to create directories if not exists, or
-//                // it will generate an Exception...
-//                if (ze.isDirectory()) {
-//                    File fmd = new File(path + "/" + filename);
-//                    fmd.mkdirs();
-//                    continue;
-//                }
-//
-//                FileOutputStream fout = new FileOutputStream(path + "/" + filename);
-//
-//                while ((count = zis.read(buffer)) != -1) {
-//                    fout.write(buffer, 0, count);
-//                }
-//
-//                fout.close();
-//                zis.closeEntry();
-//            }
-
-            zis.close();
-            Log.d(TAG, "gunZipIt: SUCCESSFUL.. ");
-        } catch(IOException e) {
+            fout.flush();
+            fout.close();
+            input.close();
+            Log.d(TAG, "gunZipIt: SUCCESSFUL.. total = " + total);
+        } catch(IOException | BufferOverflowException e) {
             Log.e(TAG, "gunZipIt: ", e);
         }
-
-//        try{
-//            GZIPInputStream gzis =
-//                    new GZIPInputStream(new FileInputStream(INPUT_GZIP_FILE));
-//
-//            FileOutputStream out =
-//                    new FileOutputStream(OUTPUT_FILE);
-//
-//            int len;
-//            while ((len = gzis.read(buffer)) > 0) {
-//                out.write(buffer, 0, len);
-//            }
-//
-//            gzis.close();
-//            out.close();
-//            Log.d(TAG, "gunZipIt: SUCCESSFUL.. ");
-//        } catch(IOException ex){
-//            Log.e(TAG, "gunZipIt: ", ex);
-//        }
 
         Log.d(TAG, "gunZipIt: DONE.. ");
 
