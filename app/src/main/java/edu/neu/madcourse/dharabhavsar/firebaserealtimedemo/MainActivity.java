@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 
 public class MainActivity extends BaseActivity {
 
@@ -43,8 +42,6 @@ public class MainActivity extends BaseActivity {
 //        DatabaseReference myRef = database.getReferenceFromUrl("https://testapp-102e7.firebaseio.com/message");
 
         myRef.push().setValue("Hello, World!!!");
-
-        FirebaseStorage storage = FirebaseStorage.getInstance();
 
         mSensorManager = ((SensorManager) getSystemService(Context.SENSOR_SERVICE));
         linearAccelero = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
