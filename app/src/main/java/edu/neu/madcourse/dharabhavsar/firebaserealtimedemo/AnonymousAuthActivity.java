@@ -38,14 +38,14 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import org.xml.sax.InputSource;
-
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.util.List;
@@ -339,21 +339,23 @@ public class AnonymousAuthActivity extends BaseActivity implements
             fis = new FileInputStream(INPUT_GZIP_FILE);
             gis = new GZIPInputStream(new BufferedInputStream(fis));
 
-            InputSource is = new InputSource(gis);
-            InputStream input = new BufferedInputStream(is.getByteStream());
+            Log.d(TAG, "gunZipIt: ");
+            
+            InputStreamReader reader = new InputStreamReader(gis);
+            BufferedReader bufferReader = new BufferedReader(reader);
             OutputStream fout = new FileOutputStream(OUTPUT_FILE);
             byte data[] = new byte[2097152];
             long total = 0;
             int count;
 
-            while ((count = input.read(data)) != -1) {
+            while ((count = bufferReader.read()) != -1) {
                 total += count;
                 fout.write(data, 0, count);
             }
 
             fout.flush();
             fout.close();
-            input.close();
+            reader.close();
             Log.d(TAG, "gunZipIt: SUCCESSFUL.. total = " + total);
         } catch(IOException | BufferOverflowException e) {
             Log.e(TAG, "gunZipIt: ", e);
