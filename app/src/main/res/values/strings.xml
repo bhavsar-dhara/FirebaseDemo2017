@@ -10,6 +10,7 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="link_account">Link Account</string>
+    <string name="download_file">Download and Plot File</string>
     <string name="title_activity_anonymous_auth">AnonymousAuthActivity</string>
     <string name="id_fmt">User ID: %s</string>
     <string name="email_fmt">Email: %s</string>

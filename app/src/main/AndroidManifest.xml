@@ -3,6 +3,7 @@
     package="edu.neu.madcourse.dharabhavsar.firebaserealtimedemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -12,9 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".AnonymousAuthActivity"
             android:label="@string/title_activity_anonymous_auth"
@@ -37,10 +36,8 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".fcm.FcmActivity">
-
-        </activity>
-
+        <activity android:name=".fcm.FcmActivity"></activity>
+        <activity android:name=".GraphActivity"></activity>
     </application>
 
 </manifest>

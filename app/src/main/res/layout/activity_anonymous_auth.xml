@@ -61,7 +61,6 @@
 
     <TextView
         android:id="@+id/title_linking"
-        android:visibility="gone"
         style="@style/TextAppearance.AppCompat.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,7 +71,6 @@
 
     <EditText
         android:id="@+id/field_email"
-        android:visibility="gone"
         android:layout_width="@dimen/field_width_standard"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title_linking"
@@ -81,7 +79,6 @@
 
     <EditText
         android:id="@+id/field_password"
-        android:visibility="gone"
         android:layout_width="@dimen/field_width_standard"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/field_email"
@@ -91,11 +88,18 @@
 
     <Button
         android:id="@+id/button_link_account"
-        android:visibility="gone"
         android:layout_width="@dimen/field_width_standard"
         android:layout_height="wrap_content"
         android:layout_below="@+id/field_email"
         android:enabled="false"
         android:text="@string/link_account" />
+
+    <Button
+        android:id="@+id/button_download_file"
+        android:layout_width="@dimen/field_width_standard"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_link_account"
+        android:enabled="false"
+        android:text="@string/download_file" />
 
 </RelativeLayout>
