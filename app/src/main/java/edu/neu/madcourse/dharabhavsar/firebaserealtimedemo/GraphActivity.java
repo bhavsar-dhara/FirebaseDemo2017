@@ -17,6 +17,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.univocity.parsers.common.ParsingContext;
+import com.univocity.parsers.common.processor.ObjectRowProcessor;
+import com.univocity.parsers.conversions.Conversions;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -31,15 +36,16 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
@@ -65,6 +71,8 @@ public class GraphActivity extends AppCompatActivity {
     private int mProgressStatus = 0;
 
     private Handler mHandler = new Handler();
+
+    CSVAnnotatedModel[] resultList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,8 +171,11 @@ public class GraphActivity extends AppCompatActivity {
         // Create a storage reference from our app
         storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
 
+//        StorageReference pathReference =
+//                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+
         StorageReference pathReference =
-                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+                storageRef.child("test.csv.gz");
 
         File localFile = null;
         try {
@@ -325,7 +336,8 @@ public class GraphActivity extends AppCompatActivity {
                 }
 
                 Log.d(TAG, "gunZipIt: DONE.. ");
-                plotXAccGraph();
+//                plotXAccGraph();
+                readData();
 
 //                file = new File(fileDir, OUTPUT_FILE);
 //                if(file.exists()) {
@@ -345,71 +357,61 @@ public class GraphActivity extends AppCompatActivity {
         }
     }
 
-    public List<CSVAnnotatedModel> readData() {
-        CSVAnnotatedModel csv = new CSVAnnotatedModel();
-        FileInputStream fis = null;
-        Scanner sc = null;
+    public Reader getReader(String relativePath) {
+        Log.d(TAG, "getReader: " + relativePath);
+        Reader reader = null;
         try {
-            fis = new FileInputStream(new File(OUTPUT_FILE));
-            sc = new Scanner(fis, "UTF-8");
-            while (sc.hasNextLine()) {
-                String thisLine = sc.nextLine();
-                Log.d(TAG, "readData: " + thisLine.length());
-                // System.out.println(line);
-                String[] line = thisLine.split(",");
-                Log.e(TAG, "readData: " + line.length);
-            }
-            // note that Scanner suppresses exceptions
-            if (sc.ioException() != null) {
-                Log.e(TAG, "readData: sc.ioException() ", sc.ioException());
-                throw sc.ioException();
-            }
-        } catch (FileNotFoundException e) {
+//            reader = new InputStreamReader(new FileInputStream (relativePath));
+            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+        } /*catch (FileNotFoundException e) {
             e.printStackTrace();
-            Log.e(TAG, "readData: FileNotFoundException ", e);
+            Log.e(TAG, "getReader: FileNotFoundException ", e);
+        }*/ catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(TAG, "readData: IOException ", e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "readData: IOException ", e);
-                }
-            }
-            if (sc != null) {
-                sc.close();
-            }
+            Log.e(TAG, "getReader: IOException ", e);
         }
-//        try {
-//            fis = new FileInputStream(new File(OUTPUT_FILE));
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
-//            String thisLine;
-//            try {
-//                while ((thisLine = reader.readLine()) != null) {
-//                    Log.e(TAG, "readData: " + thisLine.length());
-//                    String[] line = thisLine.split(",");
-//                    Log.e(TAG, "readData: " + line.length);
-////                    csv.setHEADER_TIME_STAMP(line[0]);
-////                    csv.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(line[1]);
-////                    csv.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(line[2]);
-////                    csv.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(line[3]);
-////                    beanList.add(csv);
-//                }
-//                reader.close();
-//                fis.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "readData: IOException ", e);
-//            }
+        return reader;
+    }
+
+    public List readData() {
+        final StringBuilder out = new StringBuilder();
+        // ObjectRowProcessor converts the parsed values and gives you the resulting row.
+        ObjectRowProcessor rowProcessor = new ObjectRowProcessor() {
+            @Override
+            public void rowProcessed(Object[] row, ParsingContext context) {
+                //here is the row. Let's just print it.
+//                println(out, Arrays.toString(row));
+                out.append(Arrays.toString(row));
+                Log.e(TAG, "rowProcessed: " + Arrays.toString(row));
+//                resultList = (CSVAnnotatedModel[]) row;
+            }
+        };
+        Log.e(TAG, "rowProcessed: out = " + out);
+        rowProcessor.convertIndexes(Conversions.string()).set(0, 1, 2, 3);
+
+//        // converts values in the "Price" column (index 4) to BigDecimal
+//        rowProcessor.convertIndexes(Conversions.toBigDecimal()).set(4);
 //
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "readData: FileNotFoundException ", e);
-//        }
-        return beanList;
+//        // converts the values in columns "Make, Model and Description" to lower case, and sets the value "chevy" to null.
+//        rowProcessor.convertFields(Conversions.toLowerCase(), Conversions.toNull("chevy")).set("Make", "Model", "Description");
+//
+//        // converts the values at index 0 (year) to BigInteger. Nulls are converted to BigInteger.ZERO.
+//        rowProcessor.convertFields(new BigIntegerConversion(BigInteger.ZERO, "0")).set("year");
+
+        CsvParserSettings parserSettings = new CsvParserSettings();
+        parserSettings.getFormat().setLineSeparator("\n");
+        parserSettings.setRowProcessor(rowProcessor);
+        parserSettings.setHeaderExtractionEnabled(true);
+
+        CsvParser parser = new CsvParser(parserSettings);
+
+        //the rowProcessor will be executed here.
+        parser.parse(getReader(OUTPUT_FILE));
+//        printAndValidate(out);
+//        return new ArrayList(Arrays.asList(resultList));
+        return null;
     }
 
     private void plotXAccGraph() {

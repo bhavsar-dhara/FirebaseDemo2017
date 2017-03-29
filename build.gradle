@@ -18,7 +18,7 @@ allprojects {
     repositories {
         jcenter()
         maven {
-            url "https://mvnrepository.com/artifact/com.opencsv/opencsv"
+            url "https://mvnrepository.com/artifact/com.univocity/univocity-parsers"
         }
         maven {
             url "https://repository-achartengine.forge.cloudbees.com/snapshot/"
