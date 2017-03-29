@@ -88,7 +88,7 @@ public class GraphActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             public void run() {
                 while (mProgressStatus < 100) {
-                    mProgressStatus = doDownload(fileSize);
+//                    mProgressStatus = doDownload(fileSize);
 
                     // phone is too fast, sleep 1 second
                     try {
@@ -120,46 +120,6 @@ public class GraphActivity extends AppCompatActivity {
                 }
             }
         }).start();
-    }
-
-    private int doDownload(long fileSize) {
-
-        while (fileSize > 610949485) {
-
-            fileSize--;
-
-            if (fileSize == 54900000) {
-                Log.d(TAG, "doDownload: 10");
-                return 10;
-            } else if (fileSize == 488000000) {
-                Log.d(TAG, "doDownload: 20");
-                return 20;
-            } else if (fileSize == 427000000) {
-                Log.d(TAG, "doDownload: 30");
-                return 30;
-            } else if (fileSize == 366000000) {
-                Log.d(TAG, "doDownload: 40");
-                return 40;
-            } else if (fileSize == 305000000) {
-                Log.d(TAG, "doDownload: 50");
-                return 50;
-            } else if (fileSize == 244000000) {
-                Log.d(TAG, "doDownload: 60");
-                return 60;
-            } else if (fileSize == 183000000) {
-                Log.d(TAG, "doDownload: 70");
-                return 70;
-            } else if (fileSize == 122000000) {
-                Log.d(TAG, "doDownload: 80");
-                return 80;
-            } else if (fileSize == 61000000) {
-                Log.d(TAG, "doDownload: 90");
-                return 90;
-            }
-
-        }
-
-        return 100;
     }
 
     private void downloadFile() {
@@ -359,7 +319,8 @@ public class GraphActivity extends AppCompatActivity {
         Reader reader = null;
         try {
 //            reader = new InputStreamReader(new FileInputStream (relativePath));
-            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+//            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+            reader = new InputStreamReader(getAssets().open("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv")); // THIS WORKED YAYYY
         } /*catch (FileNotFoundException e) {
             e.printStackTrace();
             Log.e(TAG, "getReader: FileNotFoundException ", e);
@@ -385,9 +346,9 @@ public class GraphActivity extends AppCompatActivity {
 
         // The BeanListProcessor provides a list of objects extracted from the input.
         List<CSVAnnotatedModel> beans = rowProcessor.getBeans();
-        for (CSVAnnotatedModel bean : beans) {
-            Log.e(TAG, "readData: rowProcessed " + bean.toString());
-        }
+//        for (CSVAnnotatedModel bean : beans) {
+//            Log.e(TAG, "readData: rowProcessed " + bean.toString());
+//        }
 
         return beans;
     }
