@@ -1,9 +1,6 @@
 package edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model;
 
-import com.opencsv.bean.CsvBindByName;
-
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by Dhara on 3/28/2017.
@@ -12,20 +9,20 @@ import java.util.Date;
 public class CSVAnnotatedModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @CsvBindByName(required = true)
-    private Date HEADER_TIME_STAMP;
-    @CsvBindByName(required = true)
+//    @CsvBindByName(required = true)
+    private String HEADER_TIME_STAMP;
+//    @CsvBindByName(required = true)
     private String X_ACCELERATION_METERS_PER_SECOND_SQUARED;
-    @CsvBindByName(required = true)
+//    @CsvBindByName(required = true)
     private String Y_ACCELERATION_METERS_PER_SECOND_SQUARED;
-    @CsvBindByName(required = true)
+//    @CsvBindByName(required = true)
     private String Z_ACCELERATION_METERS_PER_SECOND_SQUARED;
 
-    public Date getHEADER_TIME_STAMP() {
+    public String getHEADER_TIME_STAMP() {
         return HEADER_TIME_STAMP;
     }
 
-    public void setHEADER_TIME_STAMP(Date HEADER_TIME_STAMP) {
+    public void setHEADER_TIME_STAMP(String HEADER_TIME_STAMP) {
         this.HEADER_TIME_STAMP = HEADER_TIME_STAMP;
     }
 

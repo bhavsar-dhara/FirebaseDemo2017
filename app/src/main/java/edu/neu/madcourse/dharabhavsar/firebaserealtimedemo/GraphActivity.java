@@ -17,9 +17,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.opencsv.CSVReader;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -41,10 +38,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
@@ -350,109 +345,79 @@ public class GraphActivity extends AppCompatActivity {
         }
     }
 
-    public CSVReader createReader() {
-        Log.d(TAG, "createReader: output file = " + OUTPUT_FILE);
-        CSVReader reader = null;
+    public List<CSVAnnotatedModel> readData() {
+        CSVAnnotatedModel csv = new CSVAnnotatedModel();
+        FileInputStream fis = null;
+        Scanner sc = null;
         try {
-             reader = new CSVReader(new InputStreamReader(new FileInputStream(OUTPUT_FILE)), ',' , '"' , 1);
-//            reader = new CSVReader(new FileReader(OUTPUT_FILE));
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "createReader: FileNotFoundException ", e);
-        }
-        Log.d(TAG, "createReader: reader created successfully .. " + reader.getLinesRead() + " ... " + reader.getRecordsRead());
-        return reader;
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private List<CSVAnnotatedModel> readCSVData() {
-        Log.d(TAG, "readCSVData: reading CSV data using the opencsv library");
-        HeaderColumnNameMappingStrategy<CSVAnnotatedModel> strategy = new HeaderColumnNameMappingStrategy<>();
-        strategy.setType(CSVAnnotatedModel.class);
-//        ColumnPositionMappingStrategy strategy = new ColumnPositionMappingStrategy();
-//        strategy.setType(CSVAnnotatedModel.class);
-//        String[] columns = new String[] {"HEADER_TIME_STAMP", "X_ACCELERATION_METERS_PER_SECOND_SQUARED",
-//                "Y_ACCELERATION_METERS_PER_SECOND_SQUARED", "Z_ACCELERATION_METERS_PER_SECOND_SQUARED"};
-//        strategy.setColumnMapping(columns);
-
-
-        CsvToBean<CSVAnnotatedModel> csvToBean = new CsvToBean<>();
-//        CsvToBean csv = new CsvToBean();
-
-        CSVReader reader = createReader();
-
-//        List<String[]> records = null;
-//        try {
-//            records = reader.readAll();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Iterator<String[]> iterator = records.iterator();
-//        while (iterator.hasNext()) {
-//            String[] record = iterator.next();
-//            CSVAnnotatedModel csvAnnotatedModel = new CSVAnnotatedModel();
-//            try {
-//                 csvAnnotatedModel.setHEADER_TIME_STAMP(df.parse(record[0]));
-//            } catch (ParseException e) {
-//                 e.printStackTrace();
-//            }
-//            csvAnnotatedModel.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(record[1]);
-//            csvAnnotatedModel.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(record[2]);
-//            csvAnnotatedModel.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(record[3]);
-//            beanList.add(csvAnnotatedModel);
-//        }
-
-        DateFormat df = new SimpleDateFormat();
-        int insideWhile = 0;
-        String[] currRow = null;
-        if (reader == null) {
-            Log.e(TAG, "readCSVData: reader is null");
-        } else {
-            try {
-                while ((currRow = reader.readNext()) != null) {
-                    insideWhile++;
-                    String[] record = currRow;
-                    Log.d(TAG, "readCSVData: " + record[0] + ".." + record[1] + ".."
-                            + record[2] + ".." + record[3]);
-                    CSVAnnotatedModel csvAnnotatedModel = new CSVAnnotatedModel();
-                    try {
-                        csvAnnotatedModel.setHEADER_TIME_STAMP(df.parse(record[0]));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    csvAnnotatedModel.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(record[1]);
-                    csvAnnotatedModel.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(record[2]);
-                    csvAnnotatedModel.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(record[3]);
-                    beanList.add(csvAnnotatedModel);
-                }
-                Log.d(TAG, "readCSVData: ... " + insideWhile + " ... "
-                        + reader.getLinesRead() + " ... " + reader.getRecordsRead());
-            } catch (IOException e) {
-                e.printStackTrace();
+            fis = new FileInputStream(new File(OUTPUT_FILE));
+            sc = new Scanner(fis, "UTF-8");
+            while (sc.hasNextLine()) {
+                String thisLine = sc.nextLine();
+                Log.d(TAG, "readData: " + thisLine.length());
+                // System.out.println(line);
+                String[] line = thisLine.split(",");
+                Log.e(TAG, "readData: " + line.length);
             }
-//            beanList = csvToBean.parse(strategy, reader);
-//            beanList = csv.parse(strategy, reader);
+            // note that Scanner suppresses exceptions
+            if (sc.ioException() != null) {
+                Log.e(TAG, "readData: sc.ioException() ", sc.ioException());
+                throw sc.ioException();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.e(TAG, "readData: FileNotFoundException ", e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "readData: IOException ", e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "readData: IOException ", e);
+                }
+            }
+            if (sc != null) {
+                sc.close();
+            }
         }
-
-//        for (CSVAnnotatedModel object : beanList) {
-//            Log.d(TAG, "readCSVData::: " + object.toString());
+//        try {
+//            fis = new FileInputStream(new File(OUTPUT_FILE));
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+//            String thisLine;
+//            try {
+//                while ((thisLine = reader.readLine()) != null) {
+//                    Log.e(TAG, "readData: " + thisLine.length());
+//                    String[] line = thisLine.split(",");
+//                    Log.e(TAG, "readData: " + line.length);
+////                    csv.setHEADER_TIME_STAMP(line[0]);
+////                    csv.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(line[1]);
+////                    csv.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(line[2]);
+////                    csv.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(line[3]);
+////                    beanList.add(csv);
+//                }
+//                reader.close();
+//                fis.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                Log.e(TAG, "readData: IOException ", e);
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "readData: FileNotFoundException ", e);
 //        }
-
-        if(beanList.size()==0){
-            Log.e(TAG, "readCSVData: data not found");
-            beanList.add(null);
-        } else {
-            Log.d(TAG, "readCSVData: data read into beanlist successfully");
-        }
-
         return beanList;
     }
 
     private void plotXAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
-        XYSeries series = new XYSeries("X-acceleration vs time");
+        XYSeries series = new XYSeries("Linear-acceleration vs time");
 
         float milliSecond = 0.01f;
-        List<CSVAnnotatedModel> resultString = readCSVData();
+        List<CSVAnnotatedModel> resultString = readData();
         if (resultString.size() > 1) {
             Log.d(TAG, "plotXAccGraph: making the series");
             for (CSVAnnotatedModel str : resultString) {
