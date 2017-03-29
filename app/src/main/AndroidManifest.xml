@@ -43,7 +43,8 @@
         <activity android:name=".fcm.FcmActivity">
 
         </activity>
-        <activity android:name=".GraphActivity">
+        <activity android:name=".GraphActivity"
+            android:hardwareAccelerated="true">
 
         </activity>
     </application>

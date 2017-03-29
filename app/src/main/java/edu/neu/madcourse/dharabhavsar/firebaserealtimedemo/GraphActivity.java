@@ -17,6 +17,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
@@ -40,8 +44,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -59,7 +63,10 @@ public class GraphActivity extends AppCompatActivity {
     FirebaseStorage storage;
     StorageReference storageRef;
 
-    LinearLayout chartLyt;
+    LinearLayout chart;
+    GraphView chartLyt;
+    GraphView chartLyt2;
+    GraphView chartLyt3;
 
     private static final int PROGRESS = 0x1;
 
@@ -76,7 +83,9 @@ public class GraphActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
-        chartLyt = (LinearLayout) findViewById(R.id.chart);
+        chartLyt = (GraphView) findViewById(R.id.chart);
+        chartLyt2 = (GraphView) findViewById(R.id.chart2);
+        chartLyt3 = (GraphView) findViewById(R.id.chart3);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
         mProgress = (ProgressBar) findViewById(R.id.progress_bar);
 
@@ -294,6 +303,7 @@ public class GraphActivity extends AppCompatActivity {
 
                 Log.d(TAG, "gunZipIt: DONE.. ");
                 plotXAccGraph();
+//                plotAccGraph();
 //                readData();
 
 //                file = new File(fileDir, OUTPUT_FILE);
@@ -316,17 +326,19 @@ public class GraphActivity extends AppCompatActivity {
 
     public Reader getReader(String relativePath) {
         Log.d(TAG, "getReader: " + relativePath);
+        Log.d(TAG, "getReader: exists = " + new File(relativePath).exists());
         Reader reader = null;
         try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(relativePath))));
 //            reader = new InputStreamReader(new FileInputStream (relativePath));
 //            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
-            reader = new InputStreamReader(getAssets().open("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv")); // THIS WORKED YAYYY
+//            reader = new InputStreamReader(getAssets().open("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv")); // THIS WORKED YAYYY
         } /*catch (FileNotFoundException e) {
             e.printStackTrace();
             Log.e(TAG, "getReader: FileNotFoundException ", e);
-        }*/ catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        }*/ catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "getReader: IOException ", e);
         }
@@ -342,18 +354,19 @@ public class GraphActivity extends AppCompatActivity {
         parserSettings.setHeaderExtractionEnabled(true);
 
         CsvParser parser = new CsvParser(parserSettings);
-        parser.parse(getReader("/examples/bean_test.csv"));
+        parser.parse(getReader(OUTPUT_FILE));
 
         // The BeanListProcessor provides a list of objects extracted from the input.
         List<CSVAnnotatedModel> beans = rowProcessor.getBeans();
-//        for (CSVAnnotatedModel bean : beans) {
-//            Log.e(TAG, "readData: rowProcessed " + bean.toString());
-//        }
+        for (CSVAnnotatedModel bean : beans) {
+            Log.e(TAG, "readData: rowProcessed " + bean.toString());
+        }
 
+        Log.d(TAG, "readData: size = " + beans.size());
         return beans;
     }
 
-    private void plotXAccGraph() {
+    private void plotAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
         XYSeries series = new XYSeries("X-acceleration vs time");
         XYSeries series2 = new XYSeries("Y-acceleration vs time");
@@ -427,8 +440,110 @@ public class GraphActivity extends AppCompatActivity {
                 getLineChartView(this, dataset, mRenderer);
 
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
-        chartLyt.addView(chartView, 0);
+//        chartLyt.addView();
         chartLyt.setVisibility(View.VISIBLE);
+        mProgressBarLayout.setVisibility(View.GONE);
+    }
+
+    private void plotXAccGraph() {
+        Log.d(TAG, "plotXAccGraph: started");
+        List<CSVAnnotatedModel> resultString = readData();
+
+        double milliSecond = 0.01d;
+        DataPoint[] dataPointArrayX = null;
+        List<DataPoint> dataPointListX = new ArrayList<>();
+        DataPoint[] dataPointArrayY = null;
+        List<DataPoint> dataPointListY = new ArrayList<>();
+        DataPoint[] dataPointArrayZ = null;
+        List<DataPoint> dataPointListZ = new ArrayList<>();
+
+        if (resultString.size() > 1) {
+            Log.d(TAG, "plotXAccGraph: making the series");
+            for (CSVAnnotatedModel str : resultString) {
+                DataPoint dataPointX = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListX.add(dataPointX);
+                DataPoint dataPointY = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListY.add(dataPointY);
+                DataPoint dataPointZ = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListZ.add(dataPointZ);
+                milliSecond++;
+            }
+            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
+            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
+            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
+        }
+
+        LineGraphSeries<DataPoint> seriesX = new LineGraphSeries<>(dataPointArrayX);
+        seriesX.setTitle("X-acceleration");
+        seriesX.setColor(Color.RED);
+        seriesX.setDrawDataPoints(true);
+        seriesX.setDataPointsRadius(5);
+        seriesX.setThickness(4);
+
+        LineGraphSeries<DataPoint> seriesY = new LineGraphSeries<>(dataPointArrayY);
+        seriesY.setTitle("Y-acceleration");
+        seriesY.setColor(Color.BLUE);
+        seriesY.setDrawDataPoints(true);
+        seriesY.setDataPointsRadius(5);
+        seriesY.setThickness(4);
+
+        LineGraphSeries<DataPoint> seriesZ = new LineGraphSeries<>(dataPointArrayZ);
+        seriesZ.setTitle("Z-acceleration");
+        seriesZ.setColor(Color.GREEN);
+        seriesZ.setDrawDataPoints(true);
+        seriesZ.setDataPointsRadius(5);
+        seriesZ.setThickness(4);
+
+        LegendRenderer legendRenderer = new LegendRenderer(chartLyt);
+        legendRenderer.setVisible(true);
+        legendRenderer.setAlign(LegendRenderer.LegendAlign.TOP);
+
+        chartLyt.addSeries(seriesX);
+        chartLyt.addSeries(seriesY);
+        chartLyt.addSeries(seriesZ);
+        chartLyt.setTitle("Linear Acceleration vs. Time");
+        chartLyt.setTitleTextSize(20);
+        chartLyt.setTitleColor(Color.BLACK);
+//        chartLyt.setLegendRenderer(legendRenderer);
+//        chartLyt.setTitle("X Acceleration vs. Time");
+//        chartLyt.setTitleTextSize(14);
+//        chartLyt.setTitleColor(Color.BLACK);
+//
+//        chartLyt2.addSeries(seriesY);
+////        chartLyt2.setLegendRenderer(legendRenderer);
+//        chartLyt2.setTitle("Y Acceleration vs. Time");
+//        chartLyt2.setTitleTextSize(14);
+//        chartLyt2.setTitleColor(Color.BLACK);
+//
+//        chartLyt3.addSeries(seriesZ);
+////        chartLyt3.setLegendRenderer(legendRenderer);
+//        chartLyt3.setTitle("Z Acceleration vs. Time");
+//        chartLyt3.setTitleTextSize(14);
+//        chartLyt3.setTitleColor(Color.BLACK);
+
+
+        // set manual X bounds
+        chartLyt.getViewport().setXAxisBoundsManual(true);
+        chartLyt.getViewport().setMinX(4);
+        chartLyt.getViewport().setMaxX(100);
+
+        // set manual X bounds
+        chartLyt.getViewport().setYAxisBoundsManual(true);
+        chartLyt.getViewport().setMinY(-50);
+        chartLyt.getViewport().setMaxY(50);
+
+        // enable scaling and scrolling
+        chartLyt.getViewport().setScalable(true);
+        chartLyt.getViewport().setScalableY(true);
+
+        Log.d(TAG, "plotXAccGraph: graphical chart view created");
+
+        chartLyt.setVisibility(View.VISIBLE);
+//        chartLyt2.setVisibility(View.VISIBLE);
+//        chartLyt3.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
     }
 }
