@@ -329,9 +329,9 @@ public class GraphActivity extends AppCompatActivity {
         Log.d(TAG, "getReader: exists = " + new File(relativePath).exists());
         Reader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(relativePath))));
+//            reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(relativePath))));
 //            reader = new InputStreamReader(new FileInputStream (relativePath));
-//            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
 //            reader = new InputStreamReader(getAssets().open("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv")); // THIS WORKED YAYYY
         } /*catch (FileNotFoundException e) {
             e.printStackTrace();
