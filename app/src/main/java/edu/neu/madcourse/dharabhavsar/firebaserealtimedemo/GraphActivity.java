@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -355,7 +354,7 @@ public class GraphActivity extends AppCompatActivity {
         Log.d(TAG, "createReader: output file = " + OUTPUT_FILE);
         CSVReader reader = null;
         try {
-             reader = new CSVReader(new FileReader(new File(OUTPUT_FILE)), ',' , '"' , 1);
+             reader = new CSVReader(new InputStreamReader(new FileInputStream(OUTPUT_FILE)), ',' , '"' , 1);
 //            reader = new CSVReader(new FileReader(OUTPUT_FILE));
         } catch (FileNotFoundException e) {
             Log.e(TAG, "createReader: FileNotFoundException ", e);
@@ -381,13 +380,26 @@ public class GraphActivity extends AppCompatActivity {
 
         CSVReader reader = createReader();
 
-        List<String[]> records = null;
-        try {
-            records = reader.readAll();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        List<String[]> records = null;
+//        try {
+//            records = reader.readAll();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 //        Iterator<String[]> iterator = records.iterator();
+//        while (iterator.hasNext()) {
+//            String[] record = iterator.next();
+//            CSVAnnotatedModel csvAnnotatedModel = new CSVAnnotatedModel();
+//            try {
+//                 csvAnnotatedModel.setHEADER_TIME_STAMP(df.parse(record[0]));
+//            } catch (ParseException e) {
+//                 e.printStackTrace();
+//            }
+//            csvAnnotatedModel.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(record[1]);
+//            csvAnnotatedModel.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(record[2]);
+//            csvAnnotatedModel.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(record[3]);
+//            beanList.add(csvAnnotatedModel);
+//        }
 
         DateFormat df = new SimpleDateFormat();
         int insideWhile = 0;
@@ -421,9 +433,9 @@ public class GraphActivity extends AppCompatActivity {
 //            beanList = csv.parse(strategy, reader);
         }
 
-        for (CSVAnnotatedModel object : beanList) {
-            Log.d(TAG, "readCSVData::: " + object.toString());
-        }
+//        for (CSVAnnotatedModel object : beanList) {
+//            Log.d(TAG, "readCSVData::: " + object.toString());
+//        }
 
         if(beanList.size()==0){
             Log.e(TAG, "readCSVData: data not found");
