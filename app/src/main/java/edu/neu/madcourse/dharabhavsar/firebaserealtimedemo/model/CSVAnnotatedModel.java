@@ -1,5 +1,7 @@
 package edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model;
 
+import com.univocity.parsers.annotations.Parsed;
+
 import java.io.Serializable;
 
 /**
@@ -10,12 +12,16 @@ public class CSVAnnotatedModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
 //    @CsvBindByName(required = true)
+    @Parsed(index = 0)
     private String HEADER_TIME_STAMP;
 //    @CsvBindByName(required = true)
+    @Parsed(index = 1)
     private String X_ACCELERATION_METERS_PER_SECOND_SQUARED;
 //    @CsvBindByName(required = true)
+    @Parsed(index = 2)
     private String Y_ACCELERATION_METERS_PER_SECOND_SQUARED;
 //    @CsvBindByName(required = true)
+    @Parsed(index = 3)
     private String Z_ACCELERATION_METERS_PER_SECOND_SQUARED;
 
     public String getHEADER_TIME_STAMP() {

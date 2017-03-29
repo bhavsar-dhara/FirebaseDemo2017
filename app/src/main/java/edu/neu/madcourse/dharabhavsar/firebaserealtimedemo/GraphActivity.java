@@ -17,9 +17,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.univocity.parsers.common.ParsingContext;
-import com.univocity.parsers.common.processor.ObjectRowProcessor;
-import com.univocity.parsers.conversions.Conversions;
+import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
@@ -44,7 +42,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -336,8 +333,8 @@ public class GraphActivity extends AppCompatActivity {
                 }
 
                 Log.d(TAG, "gunZipIt: DONE.. ");
-//                plotXAccGraph();
-                readData();
+                plotXAccGraph();
+//                readData();
 
 //                file = new File(fileDir, OUTPUT_FILE);
 //                if(file.exists()) {
@@ -376,47 +373,30 @@ public class GraphActivity extends AppCompatActivity {
     }
 
     public List readData() {
-        final StringBuilder out = new StringBuilder();
-        // ObjectRowProcessor converts the parsed values and gives you the resulting row.
-        ObjectRowProcessor rowProcessor = new ObjectRowProcessor() {
-            @Override
-            public void rowProcessed(Object[] row, ParsingContext context) {
-                //here is the row. Let's just print it.
-//                println(out, Arrays.toString(row));
-                out.append(Arrays.toString(row));
-                Log.e(TAG, "rowProcessed: " + Arrays.toString(row));
-//                resultList = (CSVAnnotatedModel[]) row;
-            }
-        };
-        Log.e(TAG, "rowProcessed: out = " + out);
-        rowProcessor.convertIndexes(Conversions.string()).set(0, 1, 2, 3);
-
-//        // converts values in the "Price" column (index 4) to BigDecimal
-//        rowProcessor.convertIndexes(Conversions.toBigDecimal()).set(4);
-//
-//        // converts the values in columns "Make, Model and Description" to lower case, and sets the value "chevy" to null.
-//        rowProcessor.convertFields(Conversions.toLowerCase(), Conversions.toNull("chevy")).set("Make", "Model", "Description");
-//
-//        // converts the values at index 0 (year) to BigInteger. Nulls are converted to BigInteger.ZERO.
-//        rowProcessor.convertFields(new BigIntegerConversion(BigInteger.ZERO, "0")).set("year");
+        // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+        BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
 
         CsvParserSettings parserSettings = new CsvParserSettings();
-        parserSettings.getFormat().setLineSeparator("\n");
         parserSettings.setRowProcessor(rowProcessor);
         parserSettings.setHeaderExtractionEnabled(true);
 
         CsvParser parser = new CsvParser(parserSettings);
+        parser.parse(getReader("/examples/bean_test.csv"));
 
-        //the rowProcessor will be executed here.
-        parser.parse(getReader(OUTPUT_FILE));
-//        printAndValidate(out);
-//        return new ArrayList(Arrays.asList(resultList));
-        return null;
+        // The BeanListProcessor provides a list of objects extracted from the input.
+        List<CSVAnnotatedModel> beans = rowProcessor.getBeans();
+        for (CSVAnnotatedModel bean : beans) {
+            Log.e(TAG, "readData: rowProcessed " + bean.toString());
+        }
+
+        return beans;
     }
 
     private void plotXAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
-        XYSeries series = new XYSeries("Linear-acceleration vs time");
+        XYSeries series = new XYSeries("X-acceleration vs time");
+        XYSeries series2 = new XYSeries("Y-acceleration vs time");
+        XYSeries series3 = new XYSeries("Z-acceleration vs time");
 
         float milliSecond = 0.01f;
         List<CSVAnnotatedModel> resultString = readData();
@@ -424,12 +404,16 @@ public class GraphActivity extends AppCompatActivity {
             Log.d(TAG, "plotXAccGraph: making the series");
             for (CSVAnnotatedModel str : resultString) {
                 series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
             }
         }
 
         // Now we add our series
         XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
         dataset.addSeries(series);
+        dataset.addSeries(series2);
+        dataset.addSeries(series3);
         Log.d(TAG, "plotXAccGraph: dataset containing series created");
 
         // Now we create the renderer
@@ -442,9 +426,31 @@ public class GraphActivity extends AppCompatActivity {
         renderer.setPointStyle(PointStyle.CIRCLE);
         renderer.setPointStrokeWidth(3);
 
+        // Now we create the renderer2
+        XYSeriesRenderer renderer2 = new XYSeriesRenderer();
+        renderer2.setLineWidth(2);
+        renderer2.setColor(Color.BLUE);
+        // Include low and max value
+        renderer2.setDisplayBoundingPoints(true);
+        // we add point markers
+        renderer2.setPointStyle(PointStyle.CIRCLE);
+        renderer2.setPointStrokeWidth(3);
+
+        // Now we create the renderer3
+        XYSeriesRenderer renderer3 = new XYSeriesRenderer();
+        renderer3.setLineWidth(2);
+        renderer3.setColor(Color.GREEN);
+        // Include low and max value
+        renderer3.setDisplayBoundingPoints(true);
+        // we add point markers
+        renderer3.setPointStyle(PointStyle.CIRCLE);
+        renderer3.setPointStrokeWidth(3);
+
         // Finaly we create the multiple series renderer to control the graph
         XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
         mRenderer.addSeriesRenderer(renderer);
+        mRenderer.addSeriesRenderer(renderer2);
+        mRenderer.addSeriesRenderer(renderer3);
         Log.d(TAG, "plotXAccGraph: renderer building going on");
 
         // We want to avoid black border
@@ -452,8 +458,8 @@ public class GraphActivity extends AppCompatActivity {
         mRenderer.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00));
         // Disable Pan on two axis
         mRenderer.setPanEnabled(false, false);
-        mRenderer.setYAxisMax(35);
-        mRenderer.setYAxisMin(0);
+        mRenderer.setYAxisMax(3);
+        mRenderer.setYAxisMin(-2);
         mRenderer.setShowGrid(true); // we show the grid
 
         GraphicalView chartView = ChartFactory.
