@@ -42,6 +42,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -352,24 +355,74 @@ public class GraphActivity extends AppCompatActivity {
         Log.d(TAG, "createReader: output file = " + OUTPUT_FILE);
         CSVReader reader = null;
         try {
-             reader = new CSVReader(new FileReader(OUTPUT_FILE), ',' , '"' , 1);
+             reader = new CSVReader(new FileReader(new File(OUTPUT_FILE)), ',' , '"' , 1);
+//            reader = new CSVReader(new FileReader(OUTPUT_FILE));
         } catch (FileNotFoundException e) {
             Log.e(TAG, "createReader: FileNotFoundException ", e);
         }
-        Log.d(TAG, "createReader: reader created successfully");
+        Log.d(TAG, "createReader: reader created successfully .. " + reader.getLinesRead() + " ... " + reader.getRecordsRead());
         return reader;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private List<CSVAnnotatedModel> readCSVData() {
         Log.d(TAG, "readCSVData: reading CSV data using the opencsv library");
         HeaderColumnNameMappingStrategy<CSVAnnotatedModel> strategy = new HeaderColumnNameMappingStrategy<>();
         strategy.setType(CSVAnnotatedModel.class);
+//        ColumnPositionMappingStrategy strategy = new ColumnPositionMappingStrategy();
+//        strategy.setType(CSVAnnotatedModel.class);
+//        String[] columns = new String[] {"HEADER_TIME_STAMP", "X_ACCELERATION_METERS_PER_SECOND_SQUARED",
+//                "Y_ACCELERATION_METERS_PER_SECOND_SQUARED", "Z_ACCELERATION_METERS_PER_SECOND_SQUARED"};
+//        strategy.setColumnMapping(columns);
+
+
         CsvToBean<CSVAnnotatedModel> csvToBean = new CsvToBean<>();
+//        CsvToBean csv = new CsvToBean();
+
         CSVReader reader = createReader();
+
+        List<String[]> records = null;
+        try {
+            records = reader.readAll();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        Iterator<String[]> iterator = records.iterator();
+
+        DateFormat df = new SimpleDateFormat();
+        int insideWhile = 0;
+        String[] currRow = null;
         if (reader == null) {
             Log.e(TAG, "readCSVData: reader is null");
         } else {
-            beanList = csvToBean.parse(strategy, reader);
+            try {
+                while ((currRow = reader.readNext()) != null) {
+                    insideWhile++;
+                    String[] record = currRow;
+                    Log.d(TAG, "readCSVData: " + record[0] + ".." + record[1] + ".."
+                            + record[2] + ".." + record[3]);
+                    CSVAnnotatedModel csvAnnotatedModel = new CSVAnnotatedModel();
+                    try {
+                        csvAnnotatedModel.setHEADER_TIME_STAMP(df.parse(record[0]));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    csvAnnotatedModel.setX_ACCELERATION_METERS_PER_SECOND_SQUARED(record[1]);
+                    csvAnnotatedModel.setY_ACCELERATION_METERS_PER_SECOND_SQUARED(record[2]);
+                    csvAnnotatedModel.setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(record[3]);
+                    beanList.add(csvAnnotatedModel);
+                }
+                Log.d(TAG, "readCSVData: ... " + insideWhile + " ... "
+                        + reader.getLinesRead() + " ... " + reader.getRecordsRead());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            beanList = csvToBean.parse(strategy, reader);
+//            beanList = csv.parse(strategy, reader);
+        }
+
+        for (CSVAnnotatedModel object : beanList) {
+            Log.d(TAG, "readCSVData::: " + object.toString());
         }
 
         if(beanList.size()==0){

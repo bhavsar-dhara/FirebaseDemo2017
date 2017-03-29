@@ -19,7 +19,7 @@ public class CSVAnnotatedModel implements Serializable {
     @CsvBindByName(required = true)
     private String Y_ACCELERATION_METERS_PER_SECOND_SQUARED;
     @CsvBindByName(required = true)
-    private int Z_ACCELERATION_METERS_PER_SECOND_SQUARED;
+    private String Z_ACCELERATION_METERS_PER_SECOND_SQUARED;
 
     public Date getHEADER_TIME_STAMP() {
         return HEADER_TIME_STAMP;
@@ -45,11 +45,11 @@ public class CSVAnnotatedModel implements Serializable {
         Y_ACCELERATION_METERS_PER_SECOND_SQUARED = y_ACCELERATION_METERS_PER_SECOND_SQUARED;
     }
 
-    public int getZ_ACCELERATION_METERS_PER_SECOND_SQUARED() {
+    public String getZ_ACCELERATION_METERS_PER_SECOND_SQUARED() {
         return Z_ACCELERATION_METERS_PER_SECOND_SQUARED;
     }
 
-    public void setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(int z_ACCELERATION_METERS_PER_SECOND_SQUARED) {
+    public void setZ_ACCELERATION_METERS_PER_SECOND_SQUARED(String z_ACCELERATION_METERS_PER_SECOND_SQUARED) {
         Z_ACCELERATION_METERS_PER_SECOND_SQUARED = z_ACCELERATION_METERS_PER_SECOND_SQUARED;
     }
 
