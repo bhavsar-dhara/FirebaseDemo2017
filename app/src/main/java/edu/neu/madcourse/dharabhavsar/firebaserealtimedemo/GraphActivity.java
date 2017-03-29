@@ -17,6 +17,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.opencsv.CSVReader;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -27,35 +30,31 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
 
 public class GraphActivity extends AppCompatActivity {
 
     private static final String TAG = GraphActivity.class.getSimpleName();
 
-    private static final String X_ACC_HEADER = "X_ACCELERATION_METERS_PER_SECOND_SQUARED";
-    private static final String Y_ACC_HEADER = "Y_ACCELERATION_METERS_PER_SECOND_SQUARED";
-    private static final String Z_ACC_HEADER = "Z_ACCELERATION_METERS_PER_SECOND_SQUARED";
-
     File fileDir;
     String INPUT_GZIP_FILE;
     String OUTPUT_FILE;
+    List<CSVAnnotatedModel> beanList;
 
     FirebaseStorage storage;
     StorageReference storageRef;
@@ -274,6 +273,8 @@ public class GraphActivity extends AppCompatActivity {
         OUTPUT_FILE = INPUT_GZIP_FILE.replaceAll("(.gz)+([^\\s])+(.tmp)", "");
         Log.d(TAG, "gunZipIt: OUTPUT_FILE: " + OUTPUT_FILE);
 
+        InputStream fis = null;
+        GZIPInputStream gis;
         if(makeDir()) {
             File file = new File(fileDir, OUTPUT_FILE);
             if(file.exists()) {
@@ -281,49 +282,64 @@ public class GraphActivity extends AppCompatActivity {
                 Toast.makeText(this, "File exists", Toast.LENGTH_LONG).show();
             } else {
                 try {
-                    InputStream fis = new FileInputStream(INPUT_GZIP_FILE);
-                    GZIPInputStream gis = new GZIPInputStream(new BufferedInputStream(fis));
+                    fis = new FileInputStream(INPUT_GZIP_FILE);
+                    gis = new GZIPInputStream(new BufferedInputStream(fis));
 
                     Log.d(TAG, "gunZipIt: Downloading file as it is not on sdcard");
 
                     InputStreamReader reader = new InputStreamReader(gis);
                     BufferedReader bufferReader = new BufferedReader(reader);
                     OutputStream fout = new FileOutputStream(OUTPUT_FILE);
-                    byte data[] = new byte[1024];
-                    long total = 0;
+                    BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
+                    byte[] buffer = new byte[1024];
+                    char[] cbuf = new char[1024];
+//                    long total = 0;
                     int count;
+                    while ((count = bufferReader.read(cbuf, 0, 1024)) != -1) {
+//                        Log.d(TAG, "gunZipIt: coiunt = " + count);
+//                        total += count;
+//                        fout.write(buffer, 0, count);
+                        bos.write(buffer, 0, count);
 
-                    while ((count = bufferReader.read()) != -1) {
-                        total += count;
-                        fout.write(data, 0, count);
                     }
 
 //                    while ((count = gis.read(data)) > 0) {
 //                        fout.write(data, 0, count);
 //                    }
 
+                    bos.close();
                     fout.flush();
                     fout.close();
                     bufferReader.close();
                     reader.close();
                     gis.close();
                     fis.close();
-                    Log.d(TAG, "gunZipIt: SUCCESSFUL.. total = " + total);
+                    Log.d(TAG, "gunZipIt: SUCCESSFUL.. count = " + count);
                 } catch(IOException | BufferOverflowException e) {
                     Log.e(TAG, "gunZipIt: ", e);
+                } finally {
+                    try {
+                        if (fis!=null) {
+                            fis.close();
+                        }
+                    } catch (IOException ioe) {
+                        System.out.println("Error while closing zip file" + ioe);
+                    }
                 }
 
                 Log.d(TAG, "gunZipIt: DONE.. ");
+                plotXAccGraph();
+
 //                file = new File(fileDir, OUTPUT_FILE);
-                if(file.exists()) {
-                    Log.d(TAG, "gunZipIt: File downloaded successfully. Size: " + file.getTotalSpace());
-                    Toast.makeText(this, "File downloaded successfully", Toast.LENGTH_LONG).show();
-                    // TODO : read and plot
-                    plotXAccGraph();
-                } else {
-                    Log.e(TAG, "gunZipIt: File doesn't exists. Oops something went wrong.");
-                    Toast.makeText(this, "File not downloaded successfully", Toast.LENGTH_LONG).show();
-                }
+//                if(file.exists()) {
+//                    Log.d(TAG, "gunZipIt: File downloaded successfully. Size: " + file.getTotalSpace());
+//                    Toast.makeText(this, "File downloaded successfully", Toast.LENGTH_LONG).show();
+//                    // TODO : read and plot
+//                    plotXAccGraph();
+//                } else {
+//                    Log.e(TAG, "gunZipIt: File doesn't exists. Oops something went wrong.");
+//                    Toast.makeText(this, "File not downloaded successfully", Toast.LENGTH_LONG).show();
+//                }
             }
         } else {
             Log.e(TAG, "gunZipIt: file directory generation was unsuccessful");
@@ -332,89 +348,57 @@ public class GraphActivity extends AppCompatActivity {
         }
     }
 
-    private List<Double> readExcelData(String key) {
-        List<Double> resultSet = new ArrayList<Double>();
+    public CSVReader createReader() {
+        Log.d(TAG, "createReader: output file = " + OUTPUT_FILE);
+        CSVReader reader = null;
+        try {
+             reader = new CSVReader(new FileReader(OUTPUT_FILE), ',' , '"' , 1);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "createReader: FileNotFoundException ", e);
+        }
+        Log.d(TAG, "createReader: reader created successfully");
+        return reader;
+    }
 
-        File inputWorkbook = new File(OUTPUT_FILE);
-        if(inputWorkbook.exists()) {
-            Workbook w;
-            try {
-                w = Workbook.getWorkbook(inputWorkbook);
-                // Get the first sheet
-                Sheet sheet = w.getSheet(0);
-                // Loop over column and lines
-                int row = sheet.getRows();
-                for (int j = 0; j < row; j++) {
-                    Cell cell = sheet.getCell(0, j);
-                    if(cell.getContents().equalsIgnoreCase(key)){
-                        for (int i = 1; i <= sheet.getColumns(); i++) {
-                            Cell cel = sheet.getCell(i, j);
-                            resultSet.add(Double.parseDouble(cel.getContents()));
-                        }
-                    }
-                    continue;
-                }
-            } catch (BiffException e) {
-                e.printStackTrace();
-                Log.e(TAG, "readExcelData: BiffException: ", e);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "readExcelData: Exception: ", e);
-            }
+    private List<CSVAnnotatedModel> readCSVData() {
+        Log.d(TAG, "readCSVData: reading CSV data using the opencsv library");
+        HeaderColumnNameMappingStrategy<CSVAnnotatedModel> strategy = new HeaderColumnNameMappingStrategy<>();
+        strategy.setType(CSVAnnotatedModel.class);
+        CsvToBean<CSVAnnotatedModel> csvToBean = new CsvToBean<>();
+        CSVReader reader = createReader();
+        if (reader == null) {
+            Log.e(TAG, "readCSVData: reader is null");
         } else {
-            Log.e(TAG, "readExcelData: file not found");
-            resultSet.add(0d);
+            beanList = csvToBean.parse(strategy, reader);
         }
 
-        if(resultSet.size()==0){
-            Log.e(TAG, "readExcelData: data not found");
-            resultSet.add(0d);
+        if(beanList.size()==0){
+            Log.e(TAG, "readCSVData: data not found");
+            beanList.add(null);
+        } else {
+            Log.d(TAG, "readCSVData: data read into beanlist successfully");
         }
 
-        return resultSet;
-
-//        try {
-//            AssetManager am=getAssets();
-//            InputStream is=am.open("book.xls");
-//            Workbook wb=Workbook.getWorkbook(is);
-//            Sheet s=wb.getSheet(0);
-//            int row=s.getRows();
-//            int col=s.getColumns();
-//
-//            String xx="";
-//            for (int i=0;i<row;i++)
-//            {
-//
-//                for(int c=0;c<col;c++)
-//                {
-//                    Cell z=s.getCell(c,i);
-//                    xx=xx+z.getContents();
-//
-//                }
-//
-//                xx=xx+"\n";
-//            }
-//            //display(xx);
-//        } catch (Exception e){
-//            Log.e(TAG, "readExcelData: ", e);
-//        }
-
+        return beanList;
     }
 
     private void plotXAccGraph() {
+        Log.d(TAG, "plotXAccGraph: started");
         XYSeries series = new XYSeries("X-acceleration vs time");
 
         float milliSecond = 0.01f;
-        List<Double> resultString = readExcelData(X_ACC_HEADER);
+        List<CSVAnnotatedModel> resultString = readCSVData();
         if (resultString.size() > 1) {
-            for (Double str : resultString) {
-                series.add(milliSecond++, str);
+            Log.d(TAG, "plotXAccGraph: making the series");
+            for (CSVAnnotatedModel str : resultString) {
+                series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
             }
         }
 
         // Now we add our series
         XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
         dataset.addSeries(series);
+        Log.d(TAG, "plotXAccGraph: dataset containing series created");
 
         // Now we create the renderer
         XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -429,6 +413,7 @@ public class GraphActivity extends AppCompatActivity {
         // Finaly we create the multiple series renderer to control the graph
         XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
         mRenderer.addSeriesRenderer(renderer);
+        Log.d(TAG, "plotXAccGraph: renderer building going on");
 
         // We want to avoid black border
         // transparent margins
@@ -442,6 +427,7 @@ public class GraphActivity extends AppCompatActivity {
         GraphicalView chartView = ChartFactory.
                 getLineChartView(this, dataset, mRenderer);
 
+        Log.d(TAG, "plotXAccGraph: graphical chart view created");
         chartLyt.addView(chartView, 0);
         chartLyt.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
