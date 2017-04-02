@@ -57,6 +57,7 @@ public class GraphActivity extends AppCompatActivity {
 
     File fileDir;
     String INPUT_GZIP_FILE;
+    String OUTPUT_FILE_CACHE;
     String OUTPUT_FILE;
     List<CSVAnnotatedModel> beanList;
 
@@ -90,6 +91,93 @@ public class GraphActivity extends AppCompatActivity {
         mProgress = (ProgressBar) findViewById(R.id.progress_bar);
 
         downloadFile();
+//        gunzipFile();
+    }
+
+    private void gunzipFile() {
+//        INPUT_GZIP_FILE = path + "/" + zipName;
+//        OUTPUT_FILE_CACHE = INPUT_GZIP_FILE.replaceAll("(.gz)+([^\\s])+(.tmp)", "");
+//        OUTPUT_FILE_CACHE = OUTPUT_FILE_CACHE.replaceAll("(/data)+([^\\s])+(/cache/)", "");
+//        Log.d(TAG, "gunZipIt: OUTPUT_FILE_CACHE: " + OUTPUT_FILE_CACHE);
+
+        OUTPUT_FILE_CACHE = "test.csv";
+        InputStream fis = null;
+        GZIPInputStream gis;
+        if(makeDir()) {
+            File file = new File(fileDir, OUTPUT_FILE_CACHE);
+            OUTPUT_FILE = fileDir.getAbsolutePath() + "/" + OUTPUT_FILE_CACHE;
+            Log.d(TAG, "gunZipIt: " + fileDir.getAbsolutePath());
+            if(!file.exists()) {
+                Log.d(TAG, "gunZipIt: File Exists. Size: " + file.getTotalSpace());
+                Toast.makeText(this, "File exists", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    fis = this.getApplicationContext().getAssets().open("test.csv.bin");
+                    gis = new GZIPInputStream(new BufferedInputStream(fis));
+
+                    Log.d(TAG, "gunZipIt: Downloading file as it is not on sdcard");
+
+                    InputStreamReader reader = new InputStreamReader(gis);
+                    BufferedReader bufferReader = new BufferedReader(reader);
+                    OutputStream fout = new FileOutputStream(file);
+//                    BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
+                    byte[] buffer = new byte[1024];
+                    char[] cbuf = new char[1024];
+//                    long total = 0;
+                    int count;
+                    while ((count = bufferReader.read(cbuf, 0, 1024)) != -1) {
+//                        Log.d(TAG, "gunZipIt: coiunt = " + count);
+//                        total += count;
+                        fout.write(buffer, 0, count);
+//                        bos.write(buffer, 0, count);
+
+                    }
+
+//                    while ((count = gis.read(data)) > 0) {
+//                        fout.write(data, 0, count);
+//                    }
+
+//                    bos.close();
+                    fout.flush();
+                    fout.close();
+                    bufferReader.close();
+                    reader.close();
+                    gis.close();
+                    fis.close();
+                    Log.d(TAG, "gunZipIt: SUCCESSFUL.. count = " + count);
+                } catch(IOException | BufferOverflowException e) {
+                    Log.e(TAG, "gunZipIt: ", e);
+                } finally {
+                    try {
+                        if (fis!=null) {
+                            fis.close();
+                        }
+                    } catch (IOException ioe) {
+                        System.out.println("Error while closing zip file" + ioe);
+                    }
+                }
+
+                Log.d(TAG, "gunZipIt: DONE.. ");
+                plotXAccGraph();
+//                plotAccGraph();
+//                readData();
+
+//                file = new File(fileDir, OUTPUT_FILE_CACHE);
+//                if(file.exists()) {
+//                    Log.d(TAG, "gunZipIt: File downloaded successfully. Size: " + file.getTotalSpace());
+//                    Toast.makeText(this, "File downloaded successfully", Toast.LENGTH_LONG).show();
+//                    // TODO : read and plot
+//                    plotXAccGraph();
+//                } else {
+//                    Log.e(TAG, "gunZipIt: File doesn't exists. Oops something went wrong.");
+//                    Toast.makeText(this, "File not downloaded successfully", Toast.LENGTH_LONG).show();
+//                }
+            }
+        } else {
+            Log.e(TAG, "gunZipIt: file directory generation was unsuccessful");
+            Toast.makeText(this, "File directory generation was unsuccessful", Toast.LENGTH_LONG).show();
+            this.finish();
+        }
     }
 
     private void showProgressStatus(final long fileSize) {
@@ -135,7 +223,8 @@ public class GraphActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
 
         // Create a storage reference from our app
-        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
+//        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
+        storageRef = storage.getReference();
 
 //        StorageReference pathReference =
 //                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
@@ -145,6 +234,7 @@ public class GraphActivity extends AppCompatActivity {
 
         File localFile = null;
         try {
+//            localFile = File.createTempFile("download.csv", "gz");
             localFile = File.createTempFile(pathReference.getName(), null);
             final File finalLocalFile = localFile;
             pathReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -244,14 +334,17 @@ public class GraphActivity extends AppCompatActivity {
 
     private void gunZipIt(String path, String zipName) {
         INPUT_GZIP_FILE = path + "/" + zipName;
-        OUTPUT_FILE = INPUT_GZIP_FILE.replaceAll("(.gz)+([^\\s])+(.tmp)", "");
-        Log.d(TAG, "gunZipIt: OUTPUT_FILE: " + OUTPUT_FILE);
+        OUTPUT_FILE_CACHE = INPUT_GZIP_FILE.replaceAll("(.gz)+([^\\s])+(.tmp)", "");
+        OUTPUT_FILE_CACHE = OUTPUT_FILE_CACHE.replaceAll("(/data)+([^\\s])+(/cache/)", "");
+        Log.d(TAG, "gunZipIt: OUTPUT_FILE_CACHE: " + OUTPUT_FILE_CACHE);
 
         InputStream fis = null;
         GZIPInputStream gis;
         if(makeDir()) {
-            File file = new File(fileDir, OUTPUT_FILE);
-            if(file.exists()) {
+            File file = new File(fileDir, OUTPUT_FILE_CACHE);
+            OUTPUT_FILE = fileDir.getAbsolutePath() + "/" + OUTPUT_FILE_CACHE;
+            Log.d(TAG, "gunZipIt: " + fileDir.getAbsolutePath());
+            if(!file.exists()) {
                 Log.d(TAG, "gunZipIt: File Exists. Size: " + file.getTotalSpace());
                 Toast.makeText(this, "File exists", Toast.LENGTH_LONG).show();
             } else {
@@ -263,7 +356,7 @@ public class GraphActivity extends AppCompatActivity {
 
                     InputStreamReader reader = new InputStreamReader(gis);
                     BufferedReader bufferReader = new BufferedReader(reader);
-                    OutputStream fout = new FileOutputStream(OUTPUT_FILE);
+                    OutputStream fout = new FileOutputStream(file);
                     BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
                     byte[] buffer = new byte[1024];
                     char[] cbuf = new char[1024];
@@ -272,8 +365,8 @@ public class GraphActivity extends AppCompatActivity {
                     while ((count = bufferReader.read(cbuf, 0, 1024)) != -1) {
 //                        Log.d(TAG, "gunZipIt: coiunt = " + count);
 //                        total += count;
-//                        fout.write(buffer, 0, count);
-                        bos.write(buffer, 0, count);
+                        fout.write(buffer, 0, count);
+//                        bos.write(buffer, 0, count);
 
                     }
 
@@ -306,7 +399,7 @@ public class GraphActivity extends AppCompatActivity {
 //                plotAccGraph();
 //                readData();
 
-//                file = new File(fileDir, OUTPUT_FILE);
+//                file = new File(fileDir, OUTPUT_FILE_CACHE);
 //                if(file.exists()) {
 //                    Log.d(TAG, "gunZipIt: File downloaded successfully. Size: " + file.getTotalSpace());
 //                    Toast.makeText(this, "File downloaded successfully", Toast.LENGTH_LONG).show();
@@ -358,9 +451,9 @@ public class GraphActivity extends AppCompatActivity {
 
         // The BeanListProcessor provides a list of objects extracted from the input.
         List<CSVAnnotatedModel> beans = rowProcessor.getBeans();
-        for (CSVAnnotatedModel bean : beans) {
-            Log.e(TAG, "readData: rowProcessed " + bean.toString());
-        }
+//        for (CSVAnnotatedModel bean : beans) {
+//            Log.e(TAG, "readData: rowProcessed " + bean.toString());
+//        }
 
         Log.d(TAG, "readData: size = " + beans.size());
         return beans;
