@@ -34,10 +34,10 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,32 +94,42 @@ public class GraphActivity extends AppCompatActivity {
 //        gunzipFile();
     }
 
-    private void gunzipFile() {
+        private void gunzipFile() {
 //        INPUT_GZIP_FILE = path + "/" + zipName;
 //        OUTPUT_FILE_CACHE = INPUT_GZIP_FILE.replaceAll("(.gz)+([^\\s])+(.tmp)", "");
 //        OUTPUT_FILE_CACHE = OUTPUT_FILE_CACHE.replaceAll("(/data)+([^\\s])+(/cache/)", "");
 //        Log.d(TAG, "gunZipIt: OUTPUT_FILE_CACHE: " + OUTPUT_FILE_CACHE);
 
-        OUTPUT_FILE_CACHE = "test.csv";
+//        OUTPUT_FILE_CACHE = "sensor.csv";
+        OUTPUT_FILE_CACHE = "testing2.csv";
         InputStream fis = null;
         GZIPInputStream gis;
         if(makeDir()) {
-            File file = new File(fileDir, OUTPUT_FILE_CACHE);
+            File outputFile = new File(fileDir, OUTPUT_FILE_CACHE);
             OUTPUT_FILE = fileDir.getAbsolutePath() + "/" + OUTPUT_FILE_CACHE;
-            Log.d(TAG, "gunZipIt: " + fileDir.getAbsolutePath());
-            if(!file.exists()) {
-                Log.d(TAG, "gunZipIt: File Exists. Size: " + file.getTotalSpace());
-                Toast.makeText(this, "File exists", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "gunzipFile: " + fileDir.getAbsolutePath());
+            boolean isCreated = false;
+            try {
+                isCreated = outputFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "gunzipFile: IOException: ", e);
+            }
+            if(!outputFile.exists() && !outputFile.isDirectory() && !isCreated) {
+                Log.e(TAG, "gunzipFile: File DOES NOT Exists. Size: " + outputFile.getTotalSpace());
+                Toast.makeText(this, "File NOT exists", Toast.LENGTH_LONG).show();
+                finish();
             } else {
                 try {
-                    fis = this.getApplicationContext().getAssets().open("test.csv.bin");
+//                    fis = this.getApplicationContext().getAssets().open("test.csv.bin");
+                    fis = getAssets().open("test.csv.bin");
                     gis = new GZIPInputStream(new BufferedInputStream(fis));
 
-                    Log.d(TAG, "gunZipIt: Downloading file as it is not on sdcard");
+                    Log.d(TAG, "gunzipFile: Gunzipping file");
 
                     InputStreamReader reader = new InputStreamReader(gis);
                     BufferedReader bufferReader = new BufferedReader(reader);
-                    OutputStream fout = new FileOutputStream(file);
+                    OutputStream fout = new FileOutputStream(outputFile);
 //                    BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
                     byte[] buffer = new byte[1024];
                     char[] cbuf = new char[1024];
@@ -144,9 +154,9 @@ public class GraphActivity extends AppCompatActivity {
                     reader.close();
                     gis.close();
                     fis.close();
-                    Log.d(TAG, "gunZipIt: SUCCESSFUL.. count = " + count);
+                    Log.d(TAG, "gunzipFile: SUCCESSFUL.. count = " + count);
                 } catch(IOException | BufferOverflowException e) {
-                    Log.e(TAG, "gunZipIt: ", e);
+                    Log.e(TAG, "gunzipFile: ", e);
                 } finally {
                     try {
                         if (fis!=null) {
@@ -157,7 +167,7 @@ public class GraphActivity extends AppCompatActivity {
                     }
                 }
 
-                Log.d(TAG, "gunZipIt: DONE.. ");
+                Log.d(TAG, "gunzipFile: DONE.. ");
                 plotXAccGraph();
 //                plotAccGraph();
 //                readData();
@@ -174,7 +184,7 @@ public class GraphActivity extends AppCompatActivity {
 //                }
             }
         } else {
-            Log.e(TAG, "gunZipIt: file directory generation was unsuccessful");
+            Log.e(TAG, "gunzipFile: file directory generation was unsuccessful");
             Toast.makeText(this, "File directory generation was unsuccessful", Toast.LENGTH_LONG).show();
             this.finish();
         }
@@ -227,7 +237,7 @@ public class GraphActivity extends AppCompatActivity {
         storageRef = storage.getReference();
 
 //        StorageReference pathReference =
-//                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+//                storageRef.child("sensor.csv.gz");
 
         StorageReference pathReference =
                 storageRef.child("test.csv.gz");
@@ -301,32 +311,38 @@ public class GraphActivity extends AppCompatActivity {
         Log.e(TAG, "makeDir::: mounted = " + Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED));
         Log.e(TAG, "makeDir::: removed = " + Environment.getExternalStorageState().equals(Environment.MEDIA_REMOVED));
         Log.e(TAG, "makeDir::: is storage emulated = " + Environment.isExternalStorageEmulated());
-        Log.e(TAG, "makeDir::: is storage emulated = " + Environment.isExternalStorageRemovable());
+        Log.e(TAG, "makeDir::: is storage removable = " + Environment.isExternalStorageRemovable());
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) &&
                 Environment.isExternalStorageRemovable()) {
             File extdir = Environment.getExternalStorageDirectory();
             long freeSpaceExt = extdir.getFreeSpace();
             long totalSpaceExt = extdir.getTotalSpace();
-            Log.d(TAG, "makeDir: free space = " + freeSpaceExt + ", total space = " + totalSpaceExt);
-            String root = Environment.getExternalStorageDirectory().toString();
-            fileDir = new File(root + "/saved_csv_files");
+            Log.d(TAG, "makeDir: if: free space = " + freeSpaceExt + ", total space = " + totalSpaceExt);
+            File root = Environment.getExternalStorageDirectory();
+            Log.d(TAG, "makeDir: if: root: " + root);
+            fileDir = new File(root, "/saved_csv_files");
             if (!fileDir.exists()) {
-                Log.e(TAG, "makeDir: directory " + fileDir.toString() + " not found");
+                Log.e(TAG, "makeDir: if: directory: " + fileDir.toString() + " not found");
                 return fileDir.mkdirs();
             } else {
-                Log.d(TAG, "makeDir: directory " + fileDir.toString() + " exists");
+                Log.d(TAG, "makeDir: if: directory " + fileDir.toString() + " exists");
                 return true;
             }
         } else {
-            fileDir = new File(getFilesDir() + "/saved_csv_files");
-            Log.d(TAG, "makeDir: is a directory: " + fileDir.isDirectory());
-            Log.d(TAG, "makeDir: is a file: " + fileDir.isFile());
-            boolean isSuccess = fileDir.mkdirs();
-            Log.d(TAG, "makeDir: is file directory generation successful = " + isSuccess
+            fileDir = new File(getFilesDir(), "/saved_csv_files");
+            Log.d(TAG, "makeDir: else: is a directory: " + fileDir.isDirectory());
+            Log.d(TAG, "makeDir: else: is a file: " + fileDir.isFile());
+            boolean isSuccess = false;
+            if(!fileDir.exists()) {
+                isSuccess = fileDir.mkdirs();
+            } else {
+                isSuccess = true;
+            }
+            Log.d(TAG, "makeDir: else: is file directory generation successful = " + isSuccess
                     + ", fileDir = " + fileDir.toString());
             long freeSpace = fileDir.getFreeSpace();
             long totalSpace = fileDir.getTotalSpace();
-            Log.d(TAG, "makeDir: free space = " + freeSpace + ", total space = " + totalSpace
+            Log.d(TAG, "makeDir: else: free space = " + freeSpace + ", total space = " + totalSpace
                     + ", exists = " + fileDir.exists());
             return fileDir.exists();
         }
@@ -352,12 +368,12 @@ public class GraphActivity extends AppCompatActivity {
                     fis = new FileInputStream(INPUT_GZIP_FILE);
                     gis = new GZIPInputStream(new BufferedInputStream(fis));
 
-                    Log.d(TAG, "gunZipIt: Downloading file as it is not on sdcard");
+                    Log.d(TAG, "gunZipIt: un-gunzipping the file");
 
                     InputStreamReader reader = new InputStreamReader(gis);
                     BufferedReader bufferReader = new BufferedReader(reader);
                     OutputStream fout = new FileOutputStream(file);
-                    BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
+//                    BufferedOutputStream bos = new BufferedOutputStream(fout, 1024);
                     byte[] buffer = new byte[1024];
                     char[] cbuf = new char[1024];
 //                    long total = 0;
@@ -374,7 +390,7 @@ public class GraphActivity extends AppCompatActivity {
 //                        fout.write(data, 0, count);
 //                    }
 
-                    bos.close();
+//                    bos.close();
                     fout.flush();
                     fout.close();
                     bufferReader.close();
@@ -391,6 +407,57 @@ public class GraphActivity extends AppCompatActivity {
                         }
                     } catch (IOException ioe) {
                         System.out.println("Error while closing zip file" + ioe);
+                    }
+                }
+
+//                BufferedReader in = null;
+//                try {
+//                    in = new BufferedReader(new FileReader(OUTPUT_FILE));
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//                String line;
+//                int c = 1;
+//                try {
+//                    while(((line = in.readLine()) != null) && c <10)
+//                    {
+//                        System.out.println(line);
+//                        Log.e(TAG, "gunZipIt: verifying: " + line );
+//                        c++;
+//                    }
+//                    in.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(OUTPUT_FILE)));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    int c = 1;
+                    String line;
+                    while (((line = reader.readLine()) != null) && c < 10) {
+                        String[] RowData = line.split(",");
+                        c++;
+//                        date = RowData[0];
+//                        value = RowData[1];
+                        // do something with "data" and "value"
+                        Log.e(TAG, "gunZipIt: rowData = " + RowData.toString());
+                    }
+                }
+                catch (IOException ex) {
+                    // handle exception
+                }
+                finally {
+                    try {
+                        reader.close();
+                    }
+                    catch (IOException | NullPointerException e) {
+                        // handle exception
+                        Log.e(TAG, "gunZipIt: rowData = ", e);
                     }
                 }
 
@@ -422,9 +489,10 @@ public class GraphActivity extends AppCompatActivity {
         Log.d(TAG, "getReader: exists = " + new File(relativePath).exists());
         Reader reader = null;
         try {
-//            reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(relativePath))));
+            reader = new InputStreamReader(new FileInputStream(new File(relativePath)));
 //            reader = new InputStreamReader(new FileInputStream (relativePath));
-            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+//            reader = new InputStreamReader(getAssets().open("test.csv")); // THIS WORKED YAYYY
+//            reader = new InputStreamReader(getAssets().open("sensor.csv")); // THIS WORKED YAYYY
 //            reader = new InputStreamReader(getAssets().open("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv")); // THIS WORKED YAYYY
         } /*catch (FileNotFoundException e) {
             e.printStackTrace();
