@@ -56,14 +56,9 @@ public class GZIPTest extends AppCompatActivity {
     private void gunzipFile3() {
 
         fileDir = new File(getFilesDir(), "/saved_csv_files");
-        boolean isSuccess = false;
-        if (!fileDir.exists()) {
-            isSuccess = fileDir.mkdirs();
-        } else {
-            isSuccess = true;
-        }
-        if (fileDir.exists()) {
-            OUTPUT_FILE_CACHE = "testing3.csv";
+        boolean isSuccess = fileDir.exists() || fileDir.mkdirs();
+        if (isSuccess) {
+            OUTPUT_FILE_CACHE = "testing4.csv";
             File outputFile = new File(fileDir, OUTPUT_FILE_CACHE);
             OUTPUT_FILE = fileDir.getAbsolutePath() + "/" + OUTPUT_FILE_CACHE;
 
@@ -84,8 +79,8 @@ public class GZIPTest extends AppCompatActivity {
                 InputStream fis;
                 GZIPInputStream gis;
                 try {
-//                    fis = getAssets().open("test.csv.bin");
-                    fis = getAssets().open("sensor.csv.bin");
+                    fis = getAssets().open("test.csv.bin");
+//                    fis = getAssets().open("sensor.csv.bin");
                     gis = new GZIPInputStream(new BufferedInputStream(fis));
 
                     Log.d(TAG, "gunzipFile: Gunzipping file");
@@ -105,11 +100,12 @@ public class GZIPTest extends AppCompatActivity {
 
                     // The BeanListProcessor provides a list of objects extracted from the input.
                     beanList = rowProcessor.getBeans();
-                    //        for (CSVAnnotatedModel bean : beans) {
-                    //            Log.e(TAG, "readData: rowProcessed " + bean.toString());
-                    //        }
 
                     Log.d(TAG, "readData: size = " + beanList.size());
+
+                    if(beanList.size() > 0) {
+                        Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+                    }
 
                 } catch (IOException | BufferOverflowException e) {
                     Log.e(TAG, "gunzipFile: ", e);
