@@ -102,4 +102,12 @@
         android:enabled="false"
         android:text="@string/download_file" />
 
+    <Button
+        android:id="@+id/button_download_file_2"
+        android:layout_width="@dimen/field_width_standard"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_download_file"
+        android:enabled="false"
+        android:text="@string/download_file_2" />
+
 </RelativeLayout>
