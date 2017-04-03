@@ -34,8 +34,6 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.testing.GZIPTest;
-
 /**
  * Activity to demonstrate anonymous login and account linking (with an email/password account).
  */
@@ -92,6 +90,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         findViewById(R.id.button_anonymous_sign_out).setOnClickListener(this);
         findViewById(R.id.button_link_account).setOnClickListener(this);
         findViewById(R.id.button_download_file).setOnClickListener(this);
+        findViewById(R.id.button_download_file_2).setOnClickListener(this);
     }
 
     // [START on_start_add_listener]
@@ -225,6 +224,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         findViewById(R.id.button_anonymous_sign_out).setEnabled(isSignedIn);
         findViewById(R.id.button_link_account).setEnabled(isSignedIn);
         findViewById(R.id.button_download_file).setEnabled(isSignedIn);
+        findViewById(R.id.button_download_file_2).setEnabled(isSignedIn);
     }
 
     @Override
@@ -238,12 +238,18 @@ public class AnonymousAuthActivity extends BaseActivity implements
             linkAccount();
         } else if (i == R.id.button_download_file) {
             openDownloadFileActivity();
+        } else if (i == R.id.button_download_file_2) {
+            openDownloadFileActivity2();
         }
     }
 
     private void openDownloadFileActivity() {
-//        Intent i = new Intent(this, GraphActivity.class);
-        Intent i = new Intent(this, GZIPTest.class);
+        Intent i = new Intent(this, GraphActivity.class);
+        startActivity(i);
+    }
+
+    private void openDownloadFileActivity2() {
+        Intent i = new Intent(this, Graph2Activity.class);
         startActivity(i);
     }
 }

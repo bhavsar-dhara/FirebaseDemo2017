@@ -9,12 +9,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -24,20 +28,24 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.BufferOverflowException;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
 
 public class Graph2Activity extends AppCompatActivity {
 
-    private static final String TAG = GraphActivity.class.getSimpleName();
+    private static final String TAG = Graph2Activity.class.getSimpleName();
 
-    File fileDir;
     String INPUT_GZIP_FILE;
-    String OUTPUT_FILE_CACHE;
-    String OUTPUT_FILE;
     List<CSVAnnotatedModel> beanList;
 
     FirebaseStorage storage;
@@ -52,8 +60,6 @@ public class Graph2Activity extends AppCompatActivity {
     private int mProgressStatus = 0;
 
     private Handler mHandler = new Handler();
-
-    CSVAnnotatedModel[] resultList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,11 +157,11 @@ public class Graph2Activity extends AppCompatActivity {
 //        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
         storageRef = storage.getReference();
 
-//        StorageReference pathReference =
-//                storageRef.child("sensor.csv.gz");
-
         StorageReference pathReference =
-                storageRef.child("test.csv.gz");
+                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+
+//        StorageReference pathReference =
+//                storageRef.child("test.csv.gz");
 
         File localFile = null;
         try {
@@ -171,7 +177,7 @@ public class Graph2Activity extends AppCompatActivity {
                     Log.d(TAG, "onSuccess: PATH: " + finalLocalFile.getPath());
                     //showProgressStatus(finalLocalFile.getTotalSpace());
 //                    TODO
-//                    gunZipIt(finalLocalFile.getParent(), finalLocalFile.getName());
+                    unzipFile(finalLocalFile.getParent(), finalLocalFile.getName());
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -185,6 +191,50 @@ public class Graph2Activity extends AppCompatActivity {
         }
     }
 
+    private void unzipFile(String path, String zipName) {
+        INPUT_GZIP_FILE = path + "/" + zipName;
+
+        InputStream fis;
+        GZIPInputStream gis;
+        try {
+            fis = new FileInputStream(INPUT_GZIP_FILE);
+//            fis = getAssets().open("test.csv.bin");
+//                    fis = getAssets().open("sensor.csv.bin");
+            gis = new GZIPInputStream(new BufferedInputStream(fis));
+
+            Log.d(TAG, "gunzipFile: Gunzipping file");
+
+            InputStreamReader reader = new InputStreamReader(gis);
+            BufferedReader bufferReader = new BufferedReader(reader);
+
+            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setRowProcessor(rowProcessor);
+            parserSettings.setHeaderExtractionEnabled(true);
+
+            CsvParser parser = new CsvParser(parserSettings);
+            parser.parse(bufferReader);
+
+            // The BeanListProcessor provides a list of objects extracted from the input.
+            beanList = rowProcessor.getBeans();
+
+            Log.d(TAG, "readData: size = " + beanList.size());
+
+            if(beanList.size() > 0) {
+                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+                plotAccGraph();
+            } else {
+                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+            }
+
+        } catch (IOException | BufferOverflowException e) {
+            Log.e(TAG, "gunzipFile: ", e);
+        }
+    }
+
     private void plotAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
         XYSeries series = new XYSeries("X-acceleration vs time");
@@ -192,12 +242,9 @@ public class Graph2Activity extends AppCompatActivity {
         XYSeries series3 = new XYSeries("Z-acceleration vs time");
 
         float milliSecond = 0.01f;
-//        TODO
-        List<CSVAnnotatedModel> resultString = null;
-//                = readData();
-        if (resultString.size() > 1) {
+        if (beanList.size() > 1) {
             Log.d(TAG, "plotXAccGraph: making the series");
-            for (CSVAnnotatedModel str : resultString) {
+            for (CSVAnnotatedModel str : beanList) {
                 series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
                 series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
                 series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
@@ -261,7 +308,7 @@ public class Graph2Activity extends AppCompatActivity {
                 getLineChartView(this, dataset, mRenderer);
 
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
-//        chartLyt.addView();
+        chart.addView(chartView,0);
         chart.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
     }

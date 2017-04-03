@@ -42,10 +42,7 @@ public class GraphActivity extends AppCompatActivity {
 
     private static final String TAG = GraphActivity.class.getSimpleName();
 
-    File fileDir;
     String INPUT_GZIP_FILE;
-    String OUTPUT_FILE_CACHE;
-    String OUTPUT_FILE;
     List<CSVAnnotatedModel> beanList;
 
     FirebaseStorage storage;
@@ -60,8 +57,6 @@ public class GraphActivity extends AppCompatActivity {
     private int mProgressStatus = 0;
 
     private Handler mHandler = new Handler();
-
-    CSVAnnotatedModel[] resultList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,17 +153,15 @@ public class GraphActivity extends AppCompatActivity {
 
         // Create a storage reference from our app
         storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
-//        storageRef = storage.getReference();
-
-//        StorageReference pathReference =
-//                storageRef.child("sensor.csv.gz");
 
         StorageReference pathReference =
-                storageRef.child("test.csv.gz");
+                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+
+//        StorageReference pathReference =
+//                storageRef.child("test.csv.gz");
 
         File localFile = null;
         try {
-//            localFile = File.createTempFile("download.csv", "gz");
             localFile = File.createTempFile(pathReference.getName(), null);
             final File finalLocalFile = localFile;
             pathReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -226,6 +219,10 @@ public class GraphActivity extends AppCompatActivity {
 
             if(beanList.size() > 0) {
                 Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+                plotXAccGraph();
+            } else {
+                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
             }
 
         } catch (IOException | BufferOverflowException e) {
@@ -235,8 +232,6 @@ public class GraphActivity extends AppCompatActivity {
 
     private void plotXAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
-        List<CSVAnnotatedModel> resultString = null;
-//                readData();
 
         double milliSecond = 0.01d;
         DataPoint[] dataPointArrayX = null;
@@ -246,16 +241,19 @@ public class GraphActivity extends AppCompatActivity {
         DataPoint[] dataPointArrayZ = null;
         List<DataPoint> dataPointListZ = new ArrayList<>();
 
-        if (resultString.size() > 1) {
+        if (beanList.size() > 1) {
             Log.d(TAG, "plotXAccGraph: making the series");
-            for (CSVAnnotatedModel str : resultString) {
-                DataPoint dataPointX = new DataPoint(milliSecond,
+            DataPoint dataPointX;
+            DataPoint dataPointY;
+            DataPoint dataPointZ;
+            for (CSVAnnotatedModel str : beanList) {
+                dataPointX = new DataPoint(milliSecond,
                         Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
                 dataPointListX.add(dataPointX);
-                DataPoint dataPointY = new DataPoint(milliSecond,
+                dataPointY = new DataPoint(milliSecond,
                         Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
                 dataPointListY.add(dataPointY);
-                DataPoint dataPointZ = new DataPoint(milliSecond,
+                dataPointZ = new DataPoint(milliSecond,
                         Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
                 dataPointListZ.add(dataPointZ);
                 milliSecond++;
