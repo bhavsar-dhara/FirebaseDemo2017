@@ -47,6 +47,10 @@
             android:hardwareAccelerated="true">
 
         </activity>
+        <activity android:name=".testing.GZIPTest"
+            android:hardwareAccelerated="true">
+
+        </activity>
     </application>
 
 </manifest>

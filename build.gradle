@@ -18,6 +18,9 @@ allprojects {
     repositories {
         jcenter()
         maven {
+            url "https://mvnrepository.com/artifact/com.opencsv/opencsv"
+        }
+        maven {
             url "https://mvnrepository.com/artifact/com.univocity/univocity-parsers"
         }
         maven {

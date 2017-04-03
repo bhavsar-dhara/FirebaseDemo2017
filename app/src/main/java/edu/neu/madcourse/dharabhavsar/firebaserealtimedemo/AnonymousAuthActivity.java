@@ -34,6 +34,8 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.testing.GZIPTest;
+
 /**
  * Activity to demonstrate anonymous login and account linking (with an email/password account).
  */
@@ -240,7 +242,8 @@ public class AnonymousAuthActivity extends BaseActivity implements
     }
 
     private void openDownloadFileActivity() {
-        Intent i = new Intent(this, GraphActivity.class);
+//        Intent i = new Intent(this, GraphActivity.class);
+        Intent i = new Intent(this, GZIPTest.class);
         startActivity(i);
     }
 }
