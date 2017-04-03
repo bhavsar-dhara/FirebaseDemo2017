@@ -35,18 +35,4 @@
         android:visibility="gone"
         android:id="@+id/chart" />
 
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:visibility="gone"
-        android:layout_below="@id/chart"
-        android:id="@+id/chart2" />
-
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:visibility="gone"
-        android:layout_below="@id/chart2"
-        android:id="@+id/chart3" />
-
 </RelativeLayout>

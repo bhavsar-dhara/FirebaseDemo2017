@@ -55,62 +55,39 @@ public class GZIPTest extends AppCompatActivity {
 
     private void gunzipFile3() {
 
-        fileDir = new File(getFilesDir(), "/saved_csv_files");
-        boolean isSuccess = fileDir.exists() || fileDir.mkdirs();
-        if (isSuccess) {
-            OUTPUT_FILE_CACHE = "testing4.csv";
-            File outputFile = new File(fileDir, OUTPUT_FILE_CACHE);
-            OUTPUT_FILE = fileDir.getAbsolutePath() + "/" + OUTPUT_FILE_CACHE;
-
-            boolean isCreated = false;
-            try {
-                isCreated = outputFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, "gunzipFile: IOException: ", e);
-            }
-
-            if (!outputFile.exists() && !outputFile.isDirectory() && !isCreated) {
-
-                Log.e(TAG, "gunzipFile: File DOES NOT Exists. Size: " + outputFile.getTotalSpace());
-                Toast.makeText(this, "File NOT exists", Toast.LENGTH_LONG).show();
-                finish();
-            } else {
-                InputStream fis;
-                GZIPInputStream gis;
-                try {
-                    fis = getAssets().open("test.csv.bin");
+        InputStream fis;
+        GZIPInputStream gis;
+        try {
+            fis = getAssets().open("test.csv.bin");
 //                    fis = getAssets().open("sensor.csv.bin");
-                    gis = new GZIPInputStream(new BufferedInputStream(fis));
+            gis = new GZIPInputStream(new BufferedInputStream(fis));
 
-                    Log.d(TAG, "gunzipFile: Gunzipping file");
+            Log.d(TAG, "gunzipFile: Gunzipping file");
 
-                    InputStreamReader reader = new InputStreamReader(gis);
-                    BufferedReader bufferReader = new BufferedReader(reader);
+            InputStreamReader reader = new InputStreamReader(gis);
+            BufferedReader bufferReader = new BufferedReader(reader);
 
-                    // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-                    BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
 
-                    CsvParserSettings parserSettings = new CsvParserSettings();
-                    parserSettings.setRowProcessor(rowProcessor);
-                    parserSettings.setHeaderExtractionEnabled(true);
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setRowProcessor(rowProcessor);
+            parserSettings.setHeaderExtractionEnabled(true);
 
-                    CsvParser parser = new CsvParser(parserSettings);
-                    parser.parse(bufferReader);
+            CsvParser parser = new CsvParser(parserSettings);
+            parser.parse(bufferReader);
 
-                    // The BeanListProcessor provides a list of objects extracted from the input.
-                    beanList = rowProcessor.getBeans();
+            // The BeanListProcessor provides a list of objects extracted from the input.
+            beanList = rowProcessor.getBeans();
 
-                    Log.d(TAG, "readData: size = " + beanList.size());
+            Log.d(TAG, "readData: size = " + beanList.size());
 
-                    if(beanList.size() > 0) {
-                        Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-                    }
-
-                } catch (IOException | BufferOverflowException e) {
-                    Log.e(TAG, "gunzipFile: ", e);
-                }
+            if(beanList.size() > 0) {
+                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
             }
+
+        } catch (IOException | BufferOverflowException e) {
+            Log.e(TAG, "gunzipFile: ", e);
         }
     }
 
