@@ -25,14 +25,6 @@ import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
-import org.achartengine.ChartFactory;
-import org.achartengine.GraphicalView;
-import org.achartengine.chart.PointStyle;
-import org.achartengine.model.XYMultipleSeriesDataset;
-import org.achartengine.model.XYSeries;
-import org.achartengine.renderer.XYMultipleSeriesRenderer;
-import org.achartengine.renderer.XYSeriesRenderer;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -527,85 +519,6 @@ public class GraphActivity extends AppCompatActivity {
         return beans;
     }
 
-    private void plotAccGraph() {
-        Log.d(TAG, "plotXAccGraph: started");
-        XYSeries series = new XYSeries("X-acceleration vs time");
-        XYSeries series2 = new XYSeries("Y-acceleration vs time");
-        XYSeries series3 = new XYSeries("Z-acceleration vs time");
-
-        float milliSecond = 0.01f;
-        List<CSVAnnotatedModel> resultString = readData();
-        if (resultString.size() > 1) {
-            Log.d(TAG, "plotXAccGraph: making the series");
-            for (CSVAnnotatedModel str : resultString) {
-                series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-            }
-        }
-
-        // Now we add our series
-        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-        dataset.addSeries(series);
-        dataset.addSeries(series2);
-        dataset.addSeries(series3);
-        Log.d(TAG, "plotXAccGraph: dataset containing series created");
-
-        // Now we create the renderer
-        XYSeriesRenderer renderer = new XYSeriesRenderer();
-        renderer.setLineWidth(2);
-        renderer.setColor(Color.RED);
-        // Include low and max value
-        renderer.setDisplayBoundingPoints(true);
-        // we add point markers
-        renderer.setPointStyle(PointStyle.CIRCLE);
-        renderer.setPointStrokeWidth(3);
-
-        // Now we create the renderer2
-        XYSeriesRenderer renderer2 = new XYSeriesRenderer();
-        renderer2.setLineWidth(2);
-        renderer2.setColor(Color.BLUE);
-        // Include low and max value
-        renderer2.setDisplayBoundingPoints(true);
-        // we add point markers
-        renderer2.setPointStyle(PointStyle.CIRCLE);
-        renderer2.setPointStrokeWidth(3);
-
-        // Now we create the renderer3
-        XYSeriesRenderer renderer3 = new XYSeriesRenderer();
-        renderer3.setLineWidth(2);
-        renderer3.setColor(Color.GREEN);
-        // Include low and max value
-        renderer3.setDisplayBoundingPoints(true);
-        // we add point markers
-        renderer3.setPointStyle(PointStyle.CIRCLE);
-        renderer3.setPointStrokeWidth(3);
-
-        // Finaly we create the multiple series renderer to control the graph
-        XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
-        mRenderer.addSeriesRenderer(renderer);
-        mRenderer.addSeriesRenderer(renderer2);
-        mRenderer.addSeriesRenderer(renderer3);
-        Log.d(TAG, "plotXAccGraph: renderer building going on");
-
-        // We want to avoid black border
-        // transparent margins
-        mRenderer.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00));
-        // Disable Pan on two axis
-        mRenderer.setPanEnabled(false, false);
-        mRenderer.setYAxisMax(3);
-        mRenderer.setYAxisMin(-2);
-        mRenderer.setShowGrid(true); // we show the grid
-
-        GraphicalView chartView = ChartFactory.
-                getLineChartView(this, dataset, mRenderer);
-
-        Log.d(TAG, "plotXAccGraph: graphical chart view created");
-//        chartLyt.addView();
-        chartLyt.setVisibility(View.VISIBLE);
-        mProgressBarLayout.setVisibility(View.GONE);
-    }
-
     private void plotXAccGraph() {
         Log.d(TAG, "plotXAccGraph: started");
         List<CSVAnnotatedModel> resultString = readData();
@@ -668,23 +581,6 @@ public class GraphActivity extends AppCompatActivity {
         chartLyt.setTitle("Linear Acceleration vs. Time");
         chartLyt.setTitleTextSize(20);
         chartLyt.setTitleColor(Color.BLACK);
-//        chartLyt.setLegendRenderer(legendRenderer);
-//        chartLyt.setTitle("X Acceleration vs. Time");
-//        chartLyt.setTitleTextSize(14);
-//        chartLyt.setTitleColor(Color.BLACK);
-//
-//        chartLyt2.addSeries(seriesY);
-////        chartLyt2.setLegendRenderer(legendRenderer);
-//        chartLyt2.setTitle("Y Acceleration vs. Time");
-//        chartLyt2.setTitleTextSize(14);
-//        chartLyt2.setTitleColor(Color.BLACK);
-//
-//        chartLyt3.addSeries(seriesZ);
-////        chartLyt3.setLegendRenderer(legendRenderer);
-//        chartLyt3.setTitle("Z Acceleration vs. Time");
-//        chartLyt3.setTitleTextSize(14);
-//        chartLyt3.setTitleColor(Color.BLACK);
-
 
         // set manual X bounds
         chartLyt.getViewport().setXAxisBoundsManual(true);
@@ -703,8 +599,6 @@ public class GraphActivity extends AppCompatActivity {
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
 
         chartLyt.setVisibility(View.VISIBLE);
-//        chartLyt2.setVisibility(View.VISIBLE);
-//        chartLyt3.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
     }
 }
