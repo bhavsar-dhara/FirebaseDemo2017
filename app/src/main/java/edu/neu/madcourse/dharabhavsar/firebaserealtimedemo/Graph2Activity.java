@@ -15,8 +15,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
@@ -28,10 +28,8 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,6 +45,7 @@ public class Graph2Activity extends AppCompatActivity {
 
     String INPUT_GZIP_FILE;
     List<CSVAnnotatedModel> beanList;
+    List<String[]> strArrList;
 
     FirebaseStorage storage;
     StorageReference storageRef;
@@ -185,6 +184,11 @@ public class Graph2Activity extends AppCompatActivity {
                     // Handle any errors
                     Log.e(TAG, "onFailure: ", exception);
                 }
+            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    Log.d(TAG, "onProgress: " + taskSnapshot.toString());
+                }
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -197,32 +201,50 @@ public class Graph2Activity extends AppCompatActivity {
         InputStream fis;
         GZIPInputStream gis;
         try {
-            fis = new FileInputStream(INPUT_GZIP_FILE);
+//            fis = new FileInputStream(INPUT_GZIP_FILE);
 //            fis = getAssets().open("test.csv.bin");
-//                    fis = getAssets().open("sensor.csv.bin");
-            gis = new GZIPInputStream(new BufferedInputStream(fis));
+            fis = getAssets().open("sensor.csv");
+//            gis = new GZIPInputStream(new BufferedInputStream(fis));
 
             Log.d(TAG, "gunzipFile: Gunzipping file");
 
-            InputStreamReader reader = new InputStreamReader(gis);
+            InputStreamReader reader = new InputStreamReader(fis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
-            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+//            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+//            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+//
+//            CsvParserSettings parserSettings = new CsvParserSettings();
+//            parserSettings.setRowProcessor(rowProcessor);
+//            parserSettings.setHeaderExtractionEnabled(true);
+//
+//            CsvParser parser = new CsvParser(parserSettings);
+//            parser.parse(bufferReader);
+//
+//            // The BeanListProcessor provides a list of objects extracted from the input.
+//            beanList = rowProcessor.getBeans();
+//
+//            Log.d(TAG, "readData: size = " + beanList.size());
+//
+//            if(beanList.size() > 0) {
+//                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+//                plotAccGraph();
+//            } else {
+//                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+//                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+//            }
 
-            CsvParserSettings parserSettings = new CsvParserSettings();
-            parserSettings.setRowProcessor(rowProcessor);
-            parserSettings.setHeaderExtractionEnabled(true);
 
-            CsvParser parser = new CsvParser(parserSettings);
-            parser.parse(bufferReader);
+            CsvParserSettings settings = new CsvParserSettings();
+            settings.getFormat().setLineSeparator("\n");
+            // creates a CSV parser
+            CsvParser csvParser = new CsvParser(settings);
+            // parses all rows in one go.
+            strArrList = csvParser.parseAll(bufferReader);
 
-            // The BeanListProcessor provides a list of objects extracted from the input.
-            beanList = rowProcessor.getBeans();
+            Log.d(TAG, "readData: size = " + strArrList.size());
 
-            Log.d(TAG, "readData: size = " + beanList.size());
-
-            if(beanList.size() > 0) {
+            if(strArrList.size() > 0) {
                 Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
                 plotAccGraph();
             } else {
@@ -242,12 +264,29 @@ public class Graph2Activity extends AppCompatActivity {
         XYSeries series3 = new XYSeries("Z-acceleration vs time");
 
         float milliSecond = 0.01f;
-        if (beanList.size() > 1) {
-            Log.d(TAG, "plotXAccGraph: making the series");
-            for (CSVAnnotatedModel str : beanList) {
-                series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+
+//        if (beanList.size() > 1) {
+//            Log.d(TAG, "plotXAccGraph: making the series");
+//            for (CSVAnnotatedModel str : beanList) {
+//                series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//                series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//                series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//            }
+//        }
+
+        int c = 0;
+        if (strArrList.size() > 1) {
+            Log.d(TAG, "plotAccGraph: making the series");
+            String[] str;
+            for (int i = 1; i <= strArrList.size() ; i++) {
+                str = strArrList.get(i);
+                series.add(milliSecond++, Double.parseDouble(str[1]));
+                series2.add(milliSecond++, Double.parseDouble(str[2]));
+                series3.add(milliSecond++, Double.parseDouble(str[3]));
+                if (c == 5000)
+                    break;
+                else
+                    c++;
             }
         }
 

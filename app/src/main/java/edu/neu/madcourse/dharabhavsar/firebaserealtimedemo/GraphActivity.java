@@ -15,19 +15,18 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +43,7 @@ public class GraphActivity extends AppCompatActivity {
 
     String INPUT_GZIP_FILE;
     List<CSVAnnotatedModel> beanList;
+    List<String[]> strArrList;
 
     FirebaseStorage storage;
     StorageReference storageRef;
@@ -180,6 +180,11 @@ public class GraphActivity extends AppCompatActivity {
                     // Handle any errors
                     Log.e(TAG, "onFailure: ", exception);
                 }
+            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    Log.d(TAG, "onProgress: " + taskSnapshot.toString());
+                }
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -192,9 +197,9 @@ public class GraphActivity extends AppCompatActivity {
         InputStream fis;
         GZIPInputStream gis;
         try {
-            fis = new FileInputStream(INPUT_GZIP_FILE);
+//            fis = new FileInputStream(INPUT_GZIP_FILE);
 //            fis = getAssets().open("test.csv.bin");
-//                    fis = getAssets().open("sensor.csv.bin");
+            fis = getAssets().open("sensor.csv.bin");
             gis = new GZIPInputStream(new BufferedInputStream(fis));
 
             Log.d(TAG, "gunzipFile: Gunzipping file");
@@ -202,22 +207,40 @@ public class GraphActivity extends AppCompatActivity {
             InputStreamReader reader = new InputStreamReader(gis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
-            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+//            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+//            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+//
+//            CsvParserSettings parserSettings = new CsvParserSettings();
+//            parserSettings.setRowProcessor(rowProcessor);
+//            parserSettings.setHeaderExtractionEnabled(true);
+//
+//            CsvParser parser = new CsvParser(parserSettings);
+//            parser.parse(bufferReader);
+//
+//            // The BeanListProcessor provides a list of objects extracted from the input.
+//            beanList = rowProcessor.getBeans();
+//
+//            Log.d(TAG, "readData: size = " + beanList.size());
+//
+//            if(beanList.size() > 0) {
+//                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+//                plotXAccGraph();
+//            } else {
+//                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+//                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+//            }
 
-            CsvParserSettings parserSettings = new CsvParserSettings();
-            parserSettings.setRowProcessor(rowProcessor);
-            parserSettings.setHeaderExtractionEnabled(true);
 
-            CsvParser parser = new CsvParser(parserSettings);
-            parser.parse(bufferReader);
+            CsvParserSettings settings = new CsvParserSettings();
+            settings.getFormat().setLineSeparator("\n");
+            // creates a CSV parser
+            CsvParser csvParser = new CsvParser(settings);
+            // parses all rows in one go.
+            strArrList = csvParser.parseAll(bufferReader);
 
-            // The BeanListProcessor provides a list of objects extracted from the input.
-            beanList = rowProcessor.getBeans();
+            Log.d(TAG, "readData: size = " + strArrList.size());
 
-            Log.d(TAG, "readData: size = " + beanList.size());
-
-            if(beanList.size() > 0) {
+            if(strArrList.size() > 0) {
                 Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
                 plotXAccGraph();
             } else {
@@ -241,22 +264,55 @@ public class GraphActivity extends AppCompatActivity {
         DataPoint[] dataPointArrayZ = null;
         List<DataPoint> dataPointListZ = new ArrayList<>();
 
-        if (beanList.size() > 1) {
+//        int c = 0;
+//        if (beanList.size() > 1) {
+//            Log.d(TAG, "plotXAccGraph: making the series");
+//            DataPoint dataPointX;
+//            DataPoint dataPointY;
+//            DataPoint dataPointZ;
+//            for (CSVAnnotatedModel str : beanList) {
+//                dataPointX = new DataPoint(milliSecond,
+//                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//                dataPointListX.add(dataPointX);
+//                dataPointY = new DataPoint(milliSecond,
+//                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//                dataPointListY.add(dataPointY);
+//                dataPointZ = new DataPoint(milliSecond,
+//                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+//                dataPointListZ.add(dataPointZ);
+//                milliSecond++;
+//                if (c == 5000)
+//                    break;
+//                else
+//                    c++;
+//            }
+//            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
+//            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
+//            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
+//        }
+
+        int c = 0;
+        if (strArrList.size() > 1) {
             Log.d(TAG, "plotXAccGraph: making the series");
             DataPoint dataPointX;
             DataPoint dataPointY;
             DataPoint dataPointZ;
-            for (CSVAnnotatedModel str : beanList) {
-                dataPointX = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+            String[] str;
+            for (int i = 1; i <= strArrList.size() ; i++) {
+                str = strArrList.get(i);
+                dataPointX = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[1]));
                 dataPointListX.add(dataPointX);
-                dataPointY = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointY = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[2]));
                 dataPointListY.add(dataPointY);
-                dataPointZ = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointZ = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[3]));
                 dataPointListZ.add(dataPointZ);
-                milliSecond++;
+                if (c == 5000)
+                    break;
+                else
+                    c++;
             }
             dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
             dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
