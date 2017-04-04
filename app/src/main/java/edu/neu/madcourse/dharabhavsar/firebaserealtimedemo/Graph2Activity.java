@@ -86,6 +86,7 @@ public class Graph2Activity extends BaseActivity {
         chart = (LinearLayout) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
 
+        // STEP-2 ::: Method to download the file from the Firebase Storage
         downloadFile();
     }
 
@@ -127,6 +128,9 @@ public class Graph2Activity extends BaseActivity {
         }
     }
 
+    /*
+    STEP-2 ::: Method to download the file from the Firebase Storage
+     */
     private void downloadFile() {
         storage = FirebaseStorage.getInstance();
 
@@ -134,11 +138,17 @@ public class Graph2Activity extends BaseActivity {
         storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
 //        storageRef = storage.getReference();
 
+        // FILE#1 - 10 minute dataset
         StorageReference pathReference = storageRef.child("Crowdsourcing_test_(2017-03-08%5C)RAW_HPF.csv.gz");
 
+        // FILE#2 - Existing annotated data set
+//        StorageReference pathReference = storageRef.child("SPADESInLab.alvin-SPADESInLab.2015-10-08-14-10-41-252-M0400.annotation.csv.gz");
+
+        // FILE#3 - 1 hour long dataset
 //        StorageReference pathReference =
 //                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
 
+        // FILE#4 - 25 points dataset
 //        StorageReference pathReference =
 //                storageRef.child("test.csv.gz");
 
@@ -154,8 +164,8 @@ public class Graph2Activity extends BaseActivity {
                     Log.d(TAG, "onSuccess: File obtained..... SPACE of internal memory: " + finalLocalFile.getTotalSpace());
                     Log.d(TAG, "onSuccess: File obtained..... NAME: " + finalLocalFile.getName());
                     Log.d(TAG, "onSuccess: PATH: " + finalLocalFile.getPath());
-                    //showProgressStatus(finalLocalFile.getTotalSpace());
-//                    TODO
+
+                    // STEP-3 ::: Method to unzip the downloaded file
                     unzipFile(finalLocalFile.getParent(), finalLocalFile.getName());
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -167,7 +177,7 @@ public class Graph2Activity extends BaseActivity {
             }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Log.d(TAG, "onProgress: " + taskSnapshot.toString());
+//                    Log.d(TAG, "onProgress: " + taskSnapshot.toString());
                 }
             });
         } catch (IOException e) {
@@ -175,6 +185,9 @@ public class Graph2Activity extends BaseActivity {
         }
     }
 
+    /*
+    STEP-3 ::: Method to unzip the downloaded file
+     */
     private void unzipFile(String path, String zipName) {
         INPUT_GZIP_FILE = path + "/" + zipName;
 
@@ -191,15 +204,20 @@ public class Graph2Activity extends BaseActivity {
             InputStreamReader reader = new InputStreamReader(gis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
+            // STEP-4a ::: Method to parse the CSV data into beans
 //            parser(bufferReader);
 
-        parser1(bufferReader);
+            // STEP-4b ::: Method to parse the CSV data normally specifying the separator
+            parser1(bufferReader);
 
         } catch (IOException | BufferOverflowException e) {
             Log.e(TAG, "gunzipFile: ", e);
         }
     }
 
+    /*
+    STEP-4a ::: Method to parse the CSV data into beans
+     */
     private void parser(BufferedReader bufferReader) {
 //         BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
         BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
@@ -218,6 +236,8 @@ public class Graph2Activity extends BaseActivity {
 
         if (beanList.size() > 0) {
             Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+
+            // Step-5: Method to plot the data on graph
             plotAccGraph();
         } else {
             Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
@@ -225,6 +245,9 @@ public class Graph2Activity extends BaseActivity {
         }
     }
 
+    /*
+    STEP-4b ::: Method to parse the CSV data normally specifying the separator
+     */
     private void parser1(BufferedReader bufferReader) {
         CsvParserSettings settings = new CsvParserSettings();
         settings.getFormat().setLineSeparator("\n");
@@ -237,6 +260,8 @@ public class Graph2Activity extends BaseActivity {
 
         if (strArrList.size() > 0) {
             Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+
+            // Step-5: Method to plot the data on graph
             plotAccGraph();
         } else {
             Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
@@ -244,6 +269,9 @@ public class Graph2Activity extends BaseActivity {
         }
     }
 
+    /*
+    Step-5: Method to plot the data on graph
+     */
     private void plotAccGraph() {
 //        THIS PLOT DOES NOT HAVE THE ZOOM IN/ZOOM OUT FUNCTIONALITY
         Log.d(TAG, "plotXAccGraph: started");
@@ -266,12 +294,12 @@ public class Graph2Activity extends BaseActivity {
         if (strArrList.size() > 1) {
             Log.d(TAG, "plotAccGraph: making the series");
             String[] str;
-            for (int i = 1; i <= strArrList.size(); i++) {
+            for (int i = 1; i <= strArrList.size(); i++) { // i is initialized to 1 to ignore the header row
                 str = strArrList.get(i);
                 series.add(milliSecond++, Double.parseDouble(str[1]));
                 series2.add(milliSecond++, Double.parseDouble(str[2]));
                 series3.add(milliSecond++, Double.parseDouble(str[3]));
-                if (c == 1000)
+                if (c == 1000) // c is used to plot upto first 1000 points
                     break;
                 else
                     c++;
