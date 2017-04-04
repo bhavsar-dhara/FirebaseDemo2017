@@ -1,9 +1,14 @@
 package edu.neu.madcourse.dharabhavsar.firebaserealtimedemo;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -36,8 +41,11 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
 
-public class GraphActivity extends AppCompatActivity {
+import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
+
+public class GraphActivity extends BaseActivity {
 
     private static final String TAG = GraphActivity.class.getSimpleName();
 
@@ -56,6 +64,21 @@ public class GraphActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
+
+        IntentFilter intentFilter = new IntentFilter(NetworkStateChangeReceiver.NETWORK_AVAILABLE_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                boolean isNetworkAvailable = intent.getBooleanExtra(IS_NETWORK_AVAILABLE, false);
+                String networkStatus = isNetworkAvailable ? "connected" : "disconnected";
+
+                if (networkStatus.equals("connected")) {
+                    Snackbar.make(findViewById(R.id.activity_main), "Network Status: " + networkStatus, Snackbar.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(findViewById(R.id.activity_main), "Network Status: " + networkStatus, Snackbar.LENGTH_INDEFINITE).show();
+                }
+            }
+        }, intentFilter);
 
         chartLyt = (GraphView) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
@@ -108,8 +131,10 @@ public class GraphActivity extends AppCompatActivity {
         // Create a storage reference from our app
         storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
 
-        StorageReference pathReference =
-                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+        StorageReference pathReference = storageRef.child("Crowdsourcing_test_(2017-03-08%5C)RAW_HPF.csv.gz");
+
+//        StorageReference pathReference =
+//                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
 
 //        StorageReference pathReference =
 //                storageRef.child("test.csv.gz");
@@ -271,7 +296,7 @@ public class GraphActivity extends AppCompatActivity {
                 dataPointZ = new DataPoint(milliSecond++,
                         Double.parseDouble(str[3]));
                 dataPointListZ.add(dataPointZ);
-                if (c == 5000)
+                if (c == 1000)
                     break;
                 else
                     c++;
