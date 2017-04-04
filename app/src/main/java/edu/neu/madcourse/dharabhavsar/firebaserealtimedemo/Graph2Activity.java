@@ -2,13 +2,11 @@ package edu.neu.madcourse.dharabhavsar.firebaserealtimedemo;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -17,6 +15,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
@@ -28,8 +27,10 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,13 +53,7 @@ public class Graph2Activity extends AppCompatActivity {
 
     LinearLayout chart;
 
-    private static final int PROGRESS = 0x1;
-
     private LinearLayout mProgressBarLayout;
-    private ProgressBar mProgress;
-    private int mProgressStatus = 0;
-
-    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +62,6 @@ public class Graph2Activity extends AppCompatActivity {
 
         chart = (LinearLayout) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
-        mProgress = (ProgressBar) findViewById(R.id.progress_bar);
 
         downloadFile();
     }
@@ -110,51 +104,12 @@ public class Graph2Activity extends AppCompatActivity {
         }
     }
 
-    private void showProgressStatus(final long fileSize) {
-        // Start lengthy operation in a background thread
-        new Thread(new Runnable() {
-            public void run() {
-                while (mProgressStatus < 100) {
-//                    mProgressStatus = doDownload(fileSize);
-
-                    // phone is too fast, sleep 1 second
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Update the progress bar
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            mProgress.setProgress(mProgressStatus);
-                        }
-                    });
-                }
-
-                // ok, file is downloaded,
-                if (mProgressStatus >= 100) {
-
-                    // sleep 2 seconds, so that you can see the 100%
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // close the progress bar dialog
-                    mProgressBarLayout.setVisibility(View.GONE);
-                }
-            }
-        }).start();
-    }
-
     private void downloadFile() {
         storage = FirebaseStorage.getInstance();
 
         // Create a storage reference from our app
-//        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
-        storageRef = storage.getReference();
+        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
+//        storageRef = storage.getReference();
 
         StorageReference pathReference =
                 storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
@@ -162,7 +117,7 @@ public class Graph2Activity extends AppCompatActivity {
 //        StorageReference pathReference =
 //                storageRef.child("test.csv.gz");
 
-        File localFile = null;
+        File localFile;
         try {
 //            localFile = File.createTempFile("download.csv", "gz");
             localFile = File.createTempFile(pathReference.getName(), null);
@@ -201,63 +156,71 @@ public class Graph2Activity extends AppCompatActivity {
         InputStream fis;
         GZIPInputStream gis;
         try {
-//            fis = new FileInputStream(INPUT_GZIP_FILE);
+            fis = new FileInputStream(INPUT_GZIP_FILE);
 //            fis = getAssets().open("test.csv.bin");
-            fis = getAssets().open("sensor.csv");
-//            gis = new GZIPInputStream(new BufferedInputStream(fis));
+//            fis = getAssets().open("sensor.csv");
+            gis = new GZIPInputStream(new BufferedInputStream(fis));
 
             Log.d(TAG, "gunzipFile: Gunzipping file");
 
-            InputStreamReader reader = new InputStreamReader(fis);
+            InputStreamReader reader = new InputStreamReader(gis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
-//            // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-//            BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
-//
-//            CsvParserSettings parserSettings = new CsvParserSettings();
-//            parserSettings.setRowProcessor(rowProcessor);
-//            parserSettings.setHeaderExtractionEnabled(true);
-//
-//            CsvParser parser = new CsvParser(parserSettings);
-//            parser.parse(bufferReader);
-//
-//            // The BeanListProcessor provides a list of objects extracted from the input.
-//            beanList = rowProcessor.getBeans();
-//
-//            Log.d(TAG, "readData: size = " + beanList.size());
-//
-//            if(beanList.size() > 0) {
-//                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-//                plotAccGraph();
-//            } else {
-//                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-//                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
-//            }
+//            parser(bufferReader);
 
-
-            CsvParserSettings settings = new CsvParserSettings();
-            settings.getFormat().setLineSeparator("\n");
-            // creates a CSV parser
-            CsvParser csvParser = new CsvParser(settings);
-            // parses all rows in one go.
-            strArrList = csvParser.parseAll(bufferReader);
-
-            Log.d(TAG, "readData: size = " + strArrList.size());
-
-            if(strArrList.size() > 0) {
-                Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-                plotAccGraph();
-            } else {
-                Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-                Log.e(TAG, "unzipFile: Parsing unsuccessful...");
-            }
+        parser1(bufferReader);
 
         } catch (IOException | BufferOverflowException e) {
             Log.e(TAG, "gunzipFile: ", e);
         }
     }
 
+    private void parser(BufferedReader bufferReader) {
+//         BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
+        BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
+
+        CsvParserSettings parserSettings = new CsvParserSettings();
+        parserSettings.setRowProcessor(rowProcessor);
+        parserSettings.setHeaderExtractionEnabled(true);
+
+        CsvParser parser = new CsvParser(parserSettings);
+        parser.parse(bufferReader);
+
+        // The BeanListProcessor provides a list of objects extracted from the input.
+        beanList = rowProcessor.getBeans();
+
+        Log.d(TAG, "readData: size = " + beanList.size());
+
+        if (beanList.size() > 0) {
+            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+            plotAccGraph();
+        } else {
+            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+        }
+    }
+
+    private void parser1(BufferedReader bufferReader) {
+        CsvParserSettings settings = new CsvParserSettings();
+        settings.getFormat().setLineSeparator("\n");
+        // creates a CSV parser
+        CsvParser csvParser = new CsvParser(settings);
+        // parses all rows in one go.
+        strArrList = csvParser.parseAll(bufferReader);
+
+        Log.d(TAG, "readData: size = " + strArrList.size());
+
+        if (strArrList.size() > 0) {
+            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
+            plotAccGraph();
+        } else {
+            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+        }
+    }
+
     private void plotAccGraph() {
+//        THIS PLOT DOES NOT HAVE THE ZOOM IN/ZOOM OUT FUNCTIONALITY
         Log.d(TAG, "plotXAccGraph: started");
         XYSeries series = new XYSeries("X-acceleration vs time");
         XYSeries series2 = new XYSeries("Y-acceleration vs time");
@@ -278,7 +241,7 @@ public class Graph2Activity extends AppCompatActivity {
         if (strArrList.size() > 1) {
             Log.d(TAG, "plotAccGraph: making the series");
             String[] str;
-            for (int i = 1; i <= strArrList.size() ; i++) {
+            for (int i = 1; i <= strArrList.size(); i++) {
                 str = strArrList.get(i);
                 series.add(milliSecond++, Double.parseDouble(str[1]));
                 series2.add(milliSecond++, Double.parseDouble(str[2]));
@@ -347,7 +310,7 @@ public class Graph2Activity extends AppCompatActivity {
                 getLineChartView(this, dataset, mRenderer);
 
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
-        chart.addView(chartView,0);
+        chart.addView(chartView, 0);
         chart.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
     }

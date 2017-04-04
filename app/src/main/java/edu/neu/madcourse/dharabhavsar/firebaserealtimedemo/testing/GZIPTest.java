@@ -58,6 +58,7 @@ public class GZIPTest extends AppCompatActivity {
         InputStream fis;
         GZIPInputStream gis;
         try {
+//            Will crash
             fis = getAssets().open("test.csv.bin");
 //                    fis = getAssets().open("sensor.csv.bin");
             gis = new GZIPInputStream(new BufferedInputStream(fis));
@@ -94,6 +95,7 @@ public class GZIPTest extends AppCompatActivity {
     private void gunzipFile2() {
 
         try {
+//            Will crash
             InputStream fis = getAssets().open("test.csv.bin");
 //            InputStream fis = getAssets().open("sensor.csv.bin");
             GZIPInputStream gis = new GZIPInputStream(fis);
@@ -145,6 +147,7 @@ public class GZIPTest extends AppCompatActivity {
             } else {
 
                 try {
+//                    Will crash
                     fis = getAssets().open("test.csv.bin");
                     gis = new GZIPInputStream(new BufferedInputStream(fis));
 
@@ -330,6 +333,7 @@ public class GZIPTest extends AppCompatActivity {
         byte[] buffer = new byte[1024];
 
         try {
+//            Will crash
             InputStream fis = getAssets().open("test.csv.bin");
 
             GZIPInputStream gzis =
