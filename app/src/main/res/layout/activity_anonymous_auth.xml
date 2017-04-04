@@ -70,36 +70,11 @@
         android:layout_marginTop="24dp"
         android:text="@string/account_linking" />
 
-    <EditText
-        android:id="@+id/field_email"
-        android:layout_width="@dimen/field_width_standard"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/title_linking"
-        android:hint="@string/email"
-        android:inputType="textEmailAddress" />
-
-    <EditText
-        android:id="@+id/field_password"
-        android:layout_width="@dimen/field_width_standard"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/field_email"
-        android:layout_toRightOf="@+id/field_email"
-        android:hint="@string/password"
-        android:inputType="textPassword" />
-
-    <Button
-        android:id="@+id/button_link_account"
-        android:layout_width="@dimen/field_width_standard"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/field_email"
-        android:enabled="false"
-        android:text="@string/link_account" />
-
     <Button
         android:id="@+id/button_download_file"
         android:layout_width="@dimen/field_width_standard"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_link_account"
+        android:layout_below="@+id/title_linking"
         android:enabled="false"
         android:text="@string/download_file" />
 
