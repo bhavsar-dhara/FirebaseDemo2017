@@ -44,7 +44,7 @@ public class GraphActivity extends BaseActivity {
 
     private static final String TAG = GraphActivity.class.getSimpleName();
 
-    private static final int SAMPLING_RATE = 300000;
+    private static final int SAMPLING_RATE = 300000; // based on 80Hz sampling rate data generated
 
     private String INPUT_GZIP_FILE;
 
@@ -59,10 +59,15 @@ public class GraphActivity extends BaseActivity {
     private Double[] doubleY = new Double[SAMPLING_RATE];
     private Double[] doubleZ = new Double[SAMPLING_RATE];
 
+    private Double[] doubleXArr;
+    private Double[] doubleYArr;
+    private Double[] doubleZArr;
+
     private double milliSecond = 0.01d;
     private DataPoint[] dataPointArrayX = new DataPoint[SAMPLING_RATE];
     private DataPoint[] dataPointArrayY = new DataPoint[SAMPLING_RATE];
     private DataPoint[] dataPointArrayZ = new DataPoint[SAMPLING_RATE];
+    int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,19 +222,28 @@ public class GraphActivity extends BaseActivity {
     private void parser(BufferedReader bufferReader) {
         String line;
         try {
-            int c = 0;
             while ((line = bufferReader.readLine()) != null) {
                 String[] parts = line.split(",");
 //                if (c < 10) {
 //                    Log.d(TAG, "parser: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
 //                }
-                if (c > 0) {
-                    doubleX[c] = Double.parseDouble(parts[1]);
-                    doubleY[c] = Double.parseDouble(parts[2]);
-                    doubleZ[c] = Double.parseDouble(parts[3]);
+                if (counter > 0) {
+                    doubleX[counter] = Double.parseDouble(parts[1]);
+                    doubleY[counter] = Double.parseDouble(parts[2]);
+                    doubleZ[counter] = Double.parseDouble(parts[3]);
                 }
-                c++;
+                counter++;
             }
+
+            Log.e(TAG, "parser: counter  = " + counter);
+            doubleXArr = new Double[counter];
+            doubleYArr = new Double[counter];
+            doubleZArr = new Double[counter];
+
+            System.arraycopy(doubleX, 0, doubleXArr, 0, counter);
+            System.arraycopy(doubleY, 0, doubleYArr, 0, counter);
+            System.arraycopy(doubleZ, 0, doubleZArr, 0, counter);
+
             plotXAccGraph();
         } catch (IOException e) {
             e.printStackTrace();
@@ -250,22 +264,22 @@ public class GraphActivity extends BaseActivity {
         seriesX.setTitle("X-acceleration");
         seriesX.setColor(Color.RED);
         seriesX.setDrawDataPoints(true);
-        seriesX.setDataPointsRadius(5);
-        seriesX.setThickness(4);
+        seriesX.setDataPointsRadius(2);
+        seriesX.setThickness(1);
 
         LineGraphSeries<DataPoint> seriesY = new LineGraphSeries<>(dataPointArrayY);
         seriesY.setTitle("Y-acceleration");
         seriesY.setColor(Color.BLUE);
         seriesY.setDrawDataPoints(true);
-        seriesY.setDataPointsRadius(5);
-        seriesY.setThickness(4);
+        seriesY.setDataPointsRadius(2);
+        seriesY.setThickness(1);
 
         LineGraphSeries<DataPoint> seriesZ = new LineGraphSeries<>(dataPointArrayZ);
         seriesZ.setTitle("Z-acceleration");
         seriesZ.setColor(Color.GREEN);
         seriesZ.setDrawDataPoints(true);
-        seriesZ.setDataPointsRadius(5);
-        seriesZ.setThickness(4);
+        seriesZ.setDataPointsRadius(2);
+        seriesZ.setThickness(1);
 
         LegendRenderer legendRenderer = new LegendRenderer(chartLyt);
         legendRenderer.setVisible(true);
@@ -281,14 +295,14 @@ public class GraphActivity extends BaseActivity {
         chartLyt.setTitleColor(Color.BLACK);
 
         // set manual X bounds
-        chartLyt.getViewport().setXAxisBoundsManual(true);
-        chartLyt.getViewport().setMinX(4);
-        chartLyt.getViewport().setMaxX(100);
+        chartLyt.getViewport().setXAxisBoundsManual(false);
+        chartLyt.getViewport().setMinX(1000);
+        chartLyt.getViewport().setMaxX(10000);
 
         // set manual X bounds
-        chartLyt.getViewport().setYAxisBoundsManual(true);
-        chartLyt.getViewport().setMinY(-50);
-        chartLyt.getViewport().setMaxY(50);
+        chartLyt.getViewport().setYAxisBoundsManual(false);
+        chartLyt.getViewport().setMinY(0.05);
+        chartLyt.getViewport().setMaxY(1);
 
         // enable scaling and scrolling
         chartLyt.getViewport().setScalable(true);
@@ -304,15 +318,20 @@ public class GraphActivity extends BaseActivity {
     STEP-5a ::: STEP-5c ::: Method to set data arrays from individual string arrays
      */
     private void setSeriesData() {
-        Log.e(TAG, "setSeriesData: len = " + doubleX.length);
-        for (int i = 0; i < doubleX.length ; i++) {
+        Log.e(TAG, "setSeriesData: len = " + counter);
+
+        dataPointArrayX = new DataPoint[counter];
+        dataPointArrayY = new DataPoint[counter];
+        dataPointArrayZ = new DataPoint[counter];
+
+        for (int i = 0; i < counter ; i++) {
 //            Log.e(TAG, "setSeriesData: i = " + i + " .. " + doubleX[i] + " .. " + doubleX[i] + " .. " + doubleX[i] );
             if (doubleX[i] != null)
-                dataPointArrayX[i] = new DataPoint(milliSecond, doubleX[i]);
+                dataPointArrayX[i] = new DataPoint(milliSecond, doubleXArr[i]);
             if (doubleY[i] != null)
-                dataPointArrayY[i] = new DataPoint(milliSecond, doubleY[i]);
+                dataPointArrayY[i] = new DataPoint(milliSecond, doubleYArr[i]);
             if (doubleZ[i] != null)
-                dataPointArrayZ[i] = new DataPoint(milliSecond, doubleZ[i]);
+                dataPointArrayZ[i] = new DataPoint(milliSecond, doubleZArr[i]);
             milliSecond++;
         }
     }
