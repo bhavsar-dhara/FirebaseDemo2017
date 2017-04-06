@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -49,16 +50,30 @@ public class GraphActivity extends BaseActivity {
 
     private static final String TAG = GraphActivity.class.getSimpleName();
 
-    String INPUT_GZIP_FILE;
-    List<CSVAnnotatedModel> beanList;
-    List<String[]> strArrList;
+    private static final int SAMPLING_RATE = 300000;
 
-    FirebaseStorage storage;
-    StorageReference storageRef;
+    private String INPUT_GZIP_FILE;
+    private List<CSVAnnotatedModel> beanList;
+    private List<String[]> strArrList;
 
-    GraphView chartLyt;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+
+    private GraphView chartLyt;
 
     private LinearLayout mProgressBarLayout;
+
+    private Double[] doubleX = new Double[SAMPLING_RATE];
+    private Double[] doubleY = new Double[SAMPLING_RATE];
+    private Double[] doubleZ = new Double[SAMPLING_RATE];
+
+    private double milliSecond = 0.01d;
+    private DataPoint[] dataPointArrayX = new DataPoint[SAMPLING_RATE];
+    private List<DataPoint> dataPointListX = new ArrayList<>();
+    private DataPoint[] dataPointArrayY = new DataPoint[SAMPLING_RATE];
+    private List<DataPoint> dataPointListY = new ArrayList<>();
+    private DataPoint[] dataPointArrayZ = new DataPoint[SAMPLING_RATE];
+    private List<DataPoint> dataPointListZ = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +97,10 @@ public class GraphActivity extends BaseActivity {
 
         chartLyt = (GraphView) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
+
+        Arrays.fill(doubleX, 0.0d);
+        Arrays.fill(doubleY, 0.0d);
+        Arrays.fill(doubleZ, 0.0d);
 
         // STEP-2 ::: Method to download the file from the Firebase Storage
         downloadFile();
@@ -203,7 +222,10 @@ public class GraphActivity extends BaseActivity {
 //            parser(bufferReader);
 
             // STEP-4b ::: Method to parse the CSV data normally specifying the separator
-            parser1(bufferReader);
+//            parser1(bufferReader);
+
+            // STEP-4c ::: Method to read data directly from compressed CSV file
+            parser2(bufferReader);
 
         } catch (IOException | BufferOverflowException e) {
             Log.e(TAG, "gunzipFile: ", e);
@@ -265,74 +287,49 @@ public class GraphActivity extends BaseActivity {
     }
 
     /*
+    STEP-4c ::: Method to read data directly from compressed CSV file
+     */
+    private void parser2(BufferedReader bufferReader) {
+        String line;
+        try {
+            int c = 0;
+            while ((line = bufferReader.readLine()) != null) {
+                String[] parts = line.split(",");
+//                if (c < 10) {
+//                    Log.d(TAG, "parser2: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
+//                }
+                if (c > 0) {
+                    doubleX[c] = Double.parseDouble(parts[1]);
+                    doubleY[c] = Double.parseDouble(parts[2]);
+                    doubleZ[c] = Double.parseDouble(parts[3]);
+                }
+                c++;
+            }
+            plotXAccGraph();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
     Step-5: Method to plot the data on graph
      */
     private void plotXAccGraph() {
 //        THIS PLOT HAS THE ZOOM IN/ZOOM OUT FUNCTIONALITY
         Log.d(TAG, "plotXAccGraph: started");
 
-        double milliSecond = 0.01d;
-        DataPoint[] dataPointArrayX = null;
-        List<DataPoint> dataPointListX = new ArrayList<>();
-        DataPoint[] dataPointArrayY = null;
-        List<DataPoint> dataPointListY = new ArrayList<>();
-        DataPoint[] dataPointArrayZ = null;
-        List<DataPoint> dataPointListZ = new ArrayList<>();
+        // STEP-5a ::: Method to set data arrays from bean object list
+//        setSeriesData();
 
-//        int c = 0;
-//        if (beanList.size() > 1) {
-//            Log.d(TAG, "plotXAccGraph: making the series");
-//            DataPoint dataPointX;
-//            DataPoint dataPointY;
-//            DataPoint dataPointZ;
-//            for (CSVAnnotatedModel str : beanList) {
-//                dataPointX = new DataPoint(milliSecond,
-//                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//                dataPointListX.add(dataPointX);
-//                dataPointY = new DataPoint(milliSecond,
-//                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//                dataPointListY.add(dataPointY);
-//                dataPointZ = new DataPoint(milliSecond,
-//                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//                dataPointListZ.add(dataPointZ);
-//                milliSecond++;
-//                if (c == 5000)
-//                    break;
-//                else
-//                    c++;
-//            }
-//            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
-//            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
-//            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
-//        }
+        // STEP-5b ::: Method to set data arrays from string array list
+//        setSeriesData1();
 
-        int c = 0;
-        if (strArrList.size() > 1) {
-            Log.d(TAG, "plotXAccGraph: making the series");
-            DataPoint dataPointX;
-            DataPoint dataPointY;
-            DataPoint dataPointZ;
-            String[] str;
-            for (int i = 1; i <= strArrList.size() ; i++) { // i is initialized to 1 to ignore the header row
-                str = strArrList.get(i);
-                dataPointX = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[1]));
-                dataPointListX.add(dataPointX);
-                dataPointY = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[2]));
-                dataPointListY.add(dataPointY);
-                dataPointZ = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[3]));
-                dataPointListZ.add(dataPointZ);
-                if (c == 1000) // c is used to plot upto first 1000 points
-                    break;
-                else
-                    c++;
-            }
-            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
-            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
-            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
-        }
+        // STEP-5c ::: Method to set data arrays from individual string arrays
+        setSeriesData2();
+
+        Log.e(TAG, "plotXAccGraph: X = " + dataPointArrayX.length);
+        Log.e(TAG, "plotXAccGraph: Y = " + dataPointArrayY.length);
+        Log.e(TAG, "plotXAccGraph: Z = " + dataPointArrayZ.length);
 
         LineGraphSeries<DataPoint> seriesX = new LineGraphSeries<>(dataPointArrayX);
         seriesX.setTitle("X-acceleration");
@@ -359,6 +356,8 @@ public class GraphActivity extends BaseActivity {
         legendRenderer.setVisible(true);
         legendRenderer.setAlign(LegendRenderer.LegendAlign.TOP);
 
+        Log.e(TAG, "plotXAccGraph: .. " + seriesX.isEmpty() );
+
         chartLyt.addSeries(seriesX);
         chartLyt.addSeries(seriesY);
         chartLyt.addSeries(seriesZ);
@@ -384,5 +383,87 @@ public class GraphActivity extends BaseActivity {
 
         chartLyt.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
+    }
+
+    /*
+    STEP-5a ::: Method to set data arrays from bean object list
+     */
+    private void setSeriesData() {
+        int c = 0;
+        if (beanList.size() > 1) {
+            Log.d(TAG, "setSeriesData: making the series");
+            DataPoint dataPointX;
+            DataPoint dataPointY;
+            DataPoint dataPointZ;
+            for (CSVAnnotatedModel str : beanList) {
+                dataPointX = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListX.add(dataPointX);
+                dataPointY = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListY.add(dataPointY);
+                dataPointZ = new DataPoint(milliSecond,
+                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
+                dataPointListZ.add(dataPointZ);
+                milliSecond++;
+                if (c == 5000)
+                    break;
+                else
+                    c++;
+            }
+            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
+            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
+            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
+        }
+    }
+
+    /*
+    STEP-5b ::: Method to set data arrays from string array list
+     */
+    private void setSeriesData1() {
+        int c = 0;
+        if (strArrList.size() > 1) {
+            Log.d(TAG, "setSeriesData1: making the series");
+            DataPoint dataPointX;
+            DataPoint dataPointY;
+            DataPoint dataPointZ;
+            String[] str;
+            for (int i = 1; i <= strArrList.size() ; i++) { // i is initialized to 1 to ignore the header row
+                str = strArrList.get(i);
+                dataPointX = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[1]));
+                dataPointListX.add(dataPointX);
+                dataPointY = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[2]));
+                dataPointListY.add(dataPointY);
+                dataPointZ = new DataPoint(milliSecond++,
+                        Double.parseDouble(str[3]));
+                dataPointListZ.add(dataPointZ);
+                if (c == 1000) // c is used to plot upto first 1000 points
+                    break;
+                else
+                    c++;
+            }
+            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
+            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
+            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
+        }
+    }
+
+    /*
+    STEP-5c ::: STEP-5c ::: Method to set data arrays from individual string arrays
+     */
+    private void setSeriesData2() {
+        Log.e(TAG, "setSeriesData2: len = " + doubleX.length);
+        for (int i = 0; i < doubleX.length ; i++) {
+            Log.e(TAG, "setSeriesData2: i = " + i + " .. " + doubleX[i] + " .. " + doubleX[i] + " .. " + doubleX[i] );
+            if (doubleX[i] != null)
+                dataPointArrayX[i] = new DataPoint(milliSecond, doubleX[i]);
+            if (doubleY[i] != null)
+                dataPointArrayY[i] = new DataPoint(milliSecond, doubleY[i]);
+            if (doubleZ[i] != null)
+                dataPointArrayZ[i] = new DataPoint(milliSecond, doubleZ[i]);
+            milliSecond++;
+        }
     }
 }
