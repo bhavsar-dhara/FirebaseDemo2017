@@ -12,7 +12,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -20,9 +19,6 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.univocity.parsers.common.processor.BeanListProcessor;
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -43,7 +39,6 @@ import java.nio.BufferOverflowException;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
@@ -53,8 +48,6 @@ public class Graph2Activity extends BaseActivity {
     private static final String TAG = Graph2Activity.class.getSimpleName();
 
     String INPUT_GZIP_FILE;
-    List<CSVAnnotatedModel> beanList;
-    List<String[]> strArrList;
 
     FirebaseStorage storage;
     StorageReference storageRef;
@@ -62,6 +55,12 @@ public class Graph2Activity extends BaseActivity {
     LinearLayout chart;
 
     private LinearLayout mProgressBarLayout;
+
+    XYSeries seriesX = new XYSeries("X-acceleration vs time");
+    XYSeries seriesY = new XYSeries("Y-acceleration vs time");
+    XYSeries seriesZ = new XYSeries("Z-acceleration vs time");
+
+    float milliSecond = 0.01f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,12 +144,10 @@ public class Graph2Activity extends BaseActivity {
 //        StorageReference pathReference = storageRef.child("SPADESInLab.alvin-SPADESInLab.2015-10-08-14-10-41-252-M0400.annotation.csv.gz");
 
         // FILE#3 - 1 hour long dataset
-//        StorageReference pathReference =
-//                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+//        StorageReference pathReference = storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
 
         // FILE#4 - 25 points dataset
-//        StorageReference pathReference =
-//                storageRef.child("test.csv.gz");
+//        StorageReference pathReference = storageRef.child("test.csv.gz");
 
         File localFile;
         try {
@@ -195,8 +192,6 @@ public class Graph2Activity extends BaseActivity {
         GZIPInputStream gis;
         try {
             fis = new FileInputStream(INPUT_GZIP_FILE);
-//            fis = getAssets().open("test.csv.bin");
-//            fis = getAssets().open("sensor.csv");
             gis = new GZIPInputStream(new BufferedInputStream(fis));
 
             Log.d(TAG, "gunzipFile: Gunzipping file");
@@ -204,11 +199,8 @@ public class Graph2Activity extends BaseActivity {
             InputStreamReader reader = new InputStreamReader(gis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
-            // STEP-4a ::: Method to parse the CSV data into beans
-//            parser(bufferReader);
-
-            // STEP-4b ::: Method to parse the CSV data normally specifying the separator
-            parser1(bufferReader);
+            // STEP-4a ::: Method to read data directly from compressed CSV file
+            parser(bufferReader);
 
         } catch (IOException | BufferOverflowException e) {
             Log.e(TAG, "gunzipFile: ", e);
@@ -216,56 +208,29 @@ public class Graph2Activity extends BaseActivity {
     }
 
     /*
-    STEP-4a ::: Method to parse the CSV data into beans
+    STEP-4a ::: Method to read data directly from compressed CSV file
      */
     private void parser(BufferedReader bufferReader) {
-//         BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-        BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
-
-        CsvParserSettings parserSettings = new CsvParserSettings();
-        parserSettings.setRowProcessor(rowProcessor);
-        parserSettings.setHeaderExtractionEnabled(true);
-
-        CsvParser parser = new CsvParser(parserSettings);
-        parser.parse(bufferReader);
-
-        // The BeanListProcessor provides a list of objects extracted from the input.
-        beanList = rowProcessor.getBeans();
-
-        Log.d(TAG, "readData: size = " + beanList.size());
-
-        if (beanList.size() > 0) {
-            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-
-            // Step-5: Method to plot the data on graph
+        String line;
+        try {
+            int c = 0;
+            while ((line = bufferReader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (c > 0) {
+                    seriesX.add(milliSecond, Double.parseDouble(parts[1]));
+                    seriesY.add(milliSecond, Double.parseDouble(parts[2]));
+                    seriesZ.add(milliSecond, Double.parseDouble(parts[3]));
+                }
+                if (c == 40000) // c is used to plot upto first 10000 points
+                    break;
+                else
+                    c++;
+                milliSecond++;
+                c++;
+            }
             plotAccGraph();
-        } else {
-            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
-        }
-    }
-
-    /*
-    STEP-4b ::: Method to parse the CSV data normally specifying the separator
-     */
-    private void parser1(BufferedReader bufferReader) {
-        CsvParserSettings settings = new CsvParserSettings();
-        settings.getFormat().setLineSeparator("\n");
-        // creates a CSV parser
-        CsvParser csvParser = new CsvParser(settings);
-        // parses all rows in one go.
-        strArrList = csvParser.parseAll(bufferReader);
-
-        Log.d(TAG, "readData: size = " + strArrList.size());
-
-        if (strArrList.size() > 0) {
-            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-
-            // Step-5: Method to plot the data on graph
-            plotAccGraph();
-        } else {
-            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -275,42 +240,12 @@ public class Graph2Activity extends BaseActivity {
     private void plotAccGraph() {
 //        THIS PLOT DOES NOT HAVE THE ZOOM IN/ZOOM OUT FUNCTIONALITY
         Log.d(TAG, "plotXAccGraph: started");
-        XYSeries series = new XYSeries("X-acceleration vs time");
-        XYSeries series2 = new XYSeries("Y-acceleration vs time");
-        XYSeries series3 = new XYSeries("Z-acceleration vs time");
 
-        float milliSecond = 0.01f;
-
-//        if (beanList.size() > 1) {
-//            Log.d(TAG, "plotXAccGraph: making the series");
-//            for (CSVAnnotatedModel str : beanList) {
-//                series.add(milliSecond++, Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//                series2.add(milliSecond++, Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//                series3.add(milliSecond++, Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-//            }
-//        }
-
-        int c = 0;
-        if (strArrList.size() > 1) {
-            Log.d(TAG, "plotAccGraph: making the series");
-            String[] str;
-            for (int i = 1; i <= strArrList.size(); i++) { // i is initialized to 1 to ignore the header row
-                str = strArrList.get(i);
-                series.add(milliSecond++, Double.parseDouble(str[1]));
-                series2.add(milliSecond++, Double.parseDouble(str[2]));
-                series3.add(milliSecond++, Double.parseDouble(str[3]));
-                if (c == 1000) // c is used to plot upto first 1000 points
-                    break;
-                else
-                    c++;
-            }
-        }
-
-        // Now we add our series
+        // Now we add our seriesX
         XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-        dataset.addSeries(series);
-        dataset.addSeries(series2);
-        dataset.addSeries(series3);
+        dataset.addSeries(seriesX);
+        dataset.addSeries(seriesY);
+        dataset.addSeries(seriesZ);
         Log.d(TAG, "plotXAccGraph: dataset containing series created");
 
         // Now we create the renderer

@@ -12,7 +12,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,9 +23,6 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import com.univocity.parsers.common.processor.BeanListProcessor;
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -36,12 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.BufferOverflowException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.CSVAnnotatedModel;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
@@ -53,8 +47,6 @@ public class GraphActivity extends BaseActivity {
     private static final int SAMPLING_RATE = 300000;
 
     private String INPUT_GZIP_FILE;
-    private List<CSVAnnotatedModel> beanList;
-    private List<String[]> strArrList;
 
     private FirebaseStorage storage;
     private StorageReference storageRef;
@@ -69,11 +61,8 @@ public class GraphActivity extends BaseActivity {
 
     private double milliSecond = 0.01d;
     private DataPoint[] dataPointArrayX = new DataPoint[SAMPLING_RATE];
-    private List<DataPoint> dataPointListX = new ArrayList<>();
     private DataPoint[] dataPointArrayY = new DataPoint[SAMPLING_RATE];
-    private List<DataPoint> dataPointListY = new ArrayList<>();
     private DataPoint[] dataPointArrayZ = new DataPoint[SAMPLING_RATE];
-    private List<DataPoint> dataPointListZ = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,12 +149,10 @@ public class GraphActivity extends BaseActivity {
 //        StorageReference pathReference = storageRef.child("SPADESInLab.alvin-SPADESInLab.2015-10-08-14-10-41-252-M0400.annotation.csv.gz");
 
         // FILE#3 - 1 hour long dataset
-//        StorageReference pathReference =
-//                storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
+//        StorageReference pathReference = storageRef.child("ActigraphGT9X-AccelerationCalibrated-NA.TAS1E23150066-AccelerationCalibrated.2015-10-08-14-00-00-000-M0400.sensor.csv.gz");
 
         // FILE#4 - 25 points dataset
-//        StorageReference pathReference =
-//                storageRef.child("test.csv.gz");
+//        StorageReference pathReference = storageRef.child("test.csv.gz");
 
         File localFile;
         try {
@@ -209,8 +196,6 @@ public class GraphActivity extends BaseActivity {
         GZIPInputStream gis;
         try {
             fis = new FileInputStream(INPUT_GZIP_FILE);
-//            fis = getAssets().open("test.csv.bin");
-//            fis = getAssets().open("sensor.csv.bin");
             gis = new GZIPInputStream(new BufferedInputStream(fis));
 
             Log.d(TAG, "gunzipFile: Gunzipping file");
@@ -218,14 +203,8 @@ public class GraphActivity extends BaseActivity {
             InputStreamReader reader = new InputStreamReader(gis);
             BufferedReader bufferReader = new BufferedReader(reader);
 
-            // STEP-4a ::: Method to parse the CSV data into beans
-//            parser(bufferReader);
-
-            // STEP-4b ::: Method to parse the CSV data normally specifying the separator
-//            parser1(bufferReader);
-
-            // STEP-4c ::: Method to read data directly from compressed CSV file
-            parser2(bufferReader);
+            // STEP-4a ::: Method to read data directly from compressed CSV file
+            parser(bufferReader);
 
         } catch (IOException | BufferOverflowException e) {
             Log.e(TAG, "gunzipFile: ", e);
@@ -233,70 +212,16 @@ public class GraphActivity extends BaseActivity {
     }
 
     /*
-    STEP-4a ::: Method to parse the CSV data into beans
+    STEP-4a ::: Method to read data directly from compressed CSV file
      */
     private void parser(BufferedReader bufferReader) {
-        // BeanListProcessor converts each parsed row to an instance of a given class, then stores each instance into a list.
-        BeanListProcessor<CSVAnnotatedModel> rowProcessor = new BeanListProcessor<>(CSVAnnotatedModel.class);
-
-        CsvParserSettings parserSettings = new CsvParserSettings();
-        parserSettings.setRowProcessor(rowProcessor);
-        parserSettings.setHeaderExtractionEnabled(true);
-
-        CsvParser parser = new CsvParser(parserSettings);
-        parser.parse(bufferReader);
-
-        // The BeanListProcessor provides a list of objects extracted from the input.
-        beanList = rowProcessor.getBeans();
-
-        Log.d(TAG, "readData: size = " + beanList.size());
-
-        if(beanList.size() > 0) {
-            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-
-            // Step-5: Method to plot the data on graph
-            plotXAccGraph();
-        } else {
-            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
-        }
-    }
-
-    /*
-    STEP-4b ::: Method to parse the CSV data normally specifying the separator
-     */
-    private void parser1(BufferedReader bufferReader) {
-        CsvParserSettings settings = new CsvParserSettings();
-        settings.getFormat().setLineSeparator("\n");
-        // creates a CSV parser
-        CsvParser csvParser = new CsvParser(settings);
-        // parses all rows in one go.
-        strArrList = csvParser.parseAll(bufferReader);
-
-        Log.d(TAG, "readData: size = " + strArrList.size());
-
-        if(strArrList.size() > 0) {
-            Toast.makeText(this, "Successful CSV parsing", Toast.LENGTH_LONG).show();
-
-            // Step-5: Method to plot the data on graph
-            plotXAccGraph();
-        } else {
-            Toast.makeText(this, "Unsuccessful CSV parsing", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "unzipFile: Parsing unsuccessful...");
-        }
-    }
-
-    /*
-    STEP-4c ::: Method to read data directly from compressed CSV file
-     */
-    private void parser2(BufferedReader bufferReader) {
         String line;
         try {
             int c = 0;
             while ((line = bufferReader.readLine()) != null) {
                 String[] parts = line.split(",");
 //                if (c < 10) {
-//                    Log.d(TAG, "parser2: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
+//                    Log.d(TAG, "parser: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
 //                }
                 if (c > 0) {
                     doubleX[c] = Double.parseDouble(parts[1]);
@@ -318,18 +243,8 @@ public class GraphActivity extends BaseActivity {
 //        THIS PLOT HAS THE ZOOM IN/ZOOM OUT FUNCTIONALITY
         Log.d(TAG, "plotXAccGraph: started");
 
-        // STEP-5a ::: Method to set data arrays from bean object list
-//        setSeriesData();
-
-        // STEP-5b ::: Method to set data arrays from string array list
-//        setSeriesData1();
-
-        // STEP-5c ::: Method to set data arrays from individual string arrays
-        setSeriesData2();
-
-        Log.e(TAG, "plotXAccGraph: X = " + dataPointArrayX.length);
-        Log.e(TAG, "plotXAccGraph: Y = " + dataPointArrayY.length);
-        Log.e(TAG, "plotXAccGraph: Z = " + dataPointArrayZ.length);
+        // STEP-5a ::: Method to set data arrays from individual string arrays
+        setSeriesData();
 
         LineGraphSeries<DataPoint> seriesX = new LineGraphSeries<>(dataPointArrayX);
         seriesX.setTitle("X-acceleration");
@@ -386,77 +301,12 @@ public class GraphActivity extends BaseActivity {
     }
 
     /*
-    STEP-5a ::: Method to set data arrays from bean object list
+    STEP-5a ::: STEP-5c ::: Method to set data arrays from individual string arrays
      */
     private void setSeriesData() {
-        int c = 0;
-        if (beanList.size() > 1) {
-            Log.d(TAG, "setSeriesData: making the series");
-            DataPoint dataPointX;
-            DataPoint dataPointY;
-            DataPoint dataPointZ;
-            for (CSVAnnotatedModel str : beanList) {
-                dataPointX = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getX_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                dataPointListX.add(dataPointX);
-                dataPointY = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getY_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                dataPointListY.add(dataPointY);
-                dataPointZ = new DataPoint(milliSecond,
-                        Double.parseDouble(str.getZ_ACCELERATION_METERS_PER_SECOND_SQUARED()));
-                dataPointListZ.add(dataPointZ);
-                milliSecond++;
-                if (c == 5000)
-                    break;
-                else
-                    c++;
-            }
-            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
-            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
-            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
-        }
-    }
-
-    /*
-    STEP-5b ::: Method to set data arrays from string array list
-     */
-    private void setSeriesData1() {
-        int c = 0;
-        if (strArrList.size() > 1) {
-            Log.d(TAG, "setSeriesData1: making the series");
-            DataPoint dataPointX;
-            DataPoint dataPointY;
-            DataPoint dataPointZ;
-            String[] str;
-            for (int i = 1; i <= strArrList.size() ; i++) { // i is initialized to 1 to ignore the header row
-                str = strArrList.get(i);
-                dataPointX = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[1]));
-                dataPointListX.add(dataPointX);
-                dataPointY = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[2]));
-                dataPointListY.add(dataPointY);
-                dataPointZ = new DataPoint(milliSecond++,
-                        Double.parseDouble(str[3]));
-                dataPointListZ.add(dataPointZ);
-                if (c == 1000) // c is used to plot upto first 1000 points
-                    break;
-                else
-                    c++;
-            }
-            dataPointArrayX = dataPointListX.toArray(new DataPoint[dataPointListX.size()]);
-            dataPointArrayY = dataPointListY.toArray(new DataPoint[dataPointListY.size()]);
-            dataPointArrayZ = dataPointListZ.toArray(new DataPoint[dataPointListZ.size()]);
-        }
-    }
-
-    /*
-    STEP-5c ::: STEP-5c ::: Method to set data arrays from individual string arrays
-     */
-    private void setSeriesData2() {
-        Log.e(TAG, "setSeriesData2: len = " + doubleX.length);
+        Log.e(TAG, "setSeriesData: len = " + doubleX.length);
         for (int i = 0; i < doubleX.length ; i++) {
-            Log.e(TAG, "setSeriesData2: i = " + i + " .. " + doubleX[i] + " .. " + doubleX[i] + " .. " + doubleX[i] );
+//            Log.e(TAG, "setSeriesData: i = " + i + " .. " + doubleX[i] + " .. " + doubleX[i] + " .. " + doubleX[i] );
             if (doubleX[i] != null)
                 dataPointArrayX[i] = new DataPoint(milliSecond, doubleX[i]);
             if (doubleY[i] != null)
