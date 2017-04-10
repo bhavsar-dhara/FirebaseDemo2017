@@ -222,9 +222,10 @@ public class GraphActivity extends BaseActivity {
     private void parser(BufferedReader bufferReader) {
         String line;
         try {
+            String[] parts;
             while ((line = bufferReader.readLine()) != null) {
-                String[] parts = line.split(",");
-//                if (c < 10) {
+                parts = line.split(",");
+//                if (counter < 10) {
 //                    Log.d(TAG, "parser: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
 //                }
                 if (counter > 0) {
