@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "695909784169",
+    "firebase_url": "https://testapp-102e7.firebaseio.com",
+    "project_id": "testapp-102e7",
+    "storage_bucket": "testapp-102e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695909784169:android:534567159550215c",
+        "android_client_info": {
+          "package_name": "edu.neu.madcourse.dharabhavsar.firebaserealtimedemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695909784169-a7kplmh9p194a1o3mt88fa544o2obhct.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCx1090HtVx5ViVxnQ9O0UAyeGxX9nV2E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695909784169-a7kplmh9p194a1o3mt88fa544o2obhct.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
