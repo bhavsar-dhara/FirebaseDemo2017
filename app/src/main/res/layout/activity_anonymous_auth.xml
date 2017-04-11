@@ -71,19 +71,11 @@
         android:text="@string/account_linking" />
 
     <Button
-        android:id="@+id/button_download_file"
+        android:id="@+id/button_list_files"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title_linking"
         android:enabled="false"
-        android:text="@string/download_file" />
-
-    <Button
-        android:id="@+id/button_download_file_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button_download_file"
-        android:enabled="false"
-        android:text="@string/download_file_2" />
+        android:text="@string/list_files" />
 
 </RelativeLayout>

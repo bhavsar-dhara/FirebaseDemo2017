@@ -82,11 +82,20 @@ public class Graph2Activity extends BaseActivity {
             }
         }, intentFilter);
 
+        Intent intent = getIntent();
+        String fileName = intent.getStringExtra("FileName");
+
         chart = (LinearLayout) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
 
+        storage = FirebaseStorage.getInstance();
+
+        // Create a storage reference from our app
+        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
+//        storageRef = storage.getReference();
+
         // STEP-2 ::: Method to download the file from the Firebase Storage
-        downloadFile();
+        downloadFile(fileName);
     }
 
     @Override
@@ -130,15 +139,12 @@ public class Graph2Activity extends BaseActivity {
     /*
     STEP-2 ::: Method to download the file from the Firebase Storage
      */
-    private void downloadFile() {
-        storage = FirebaseStorage.getInstance();
-
-        // Create a storage reference from our app
-        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
-//        storageRef = storage.getReference();
+    private void downloadFile(String fileName) {
+        Log.d(TAG, "downloadFile: " + fileName);
+        StorageReference pathReference = storageRef.child(fileName);
 
         // FILE#1 - 10 minute dataset
-        StorageReference pathReference = storageRef.child("Crowdsourcing_test_(2017-03-08%5C)RAW_HPF.csv.gz");
+//        StorageReference pathReference = storageRef.child("Crowdsourcing_test_(2017-03-08%5C)RAW_HPF.csv.gz");
 
         // FILE#2 - Existing annotated data set
 //        StorageReference pathReference = storageRef.child("SPADESInLab.alvin-SPADESInLab.2015-10-08-14-10-41-252-M0400.annotation.csv.gz");

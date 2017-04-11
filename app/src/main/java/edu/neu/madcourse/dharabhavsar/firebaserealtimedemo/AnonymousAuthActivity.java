@@ -100,8 +100,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         // Click listeners
         findViewById(R.id.button_anonymous_sign_in).setOnClickListener(this);
         findViewById(R.id.button_anonymous_sign_out).setOnClickListener(this);
-        findViewById(R.id.button_download_file).setOnClickListener(this);
-        findViewById(R.id.button_download_file_2).setOnClickListener(this);
+        findViewById(R.id.button_list_files).setOnClickListener(this);
     }
 
     // [START on_start_add_listener]
@@ -161,8 +160,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         // Button visibility
         findViewById(R.id.button_anonymous_sign_in).setEnabled(!isSignedIn);
         findViewById(R.id.button_anonymous_sign_out).setEnabled(isSignedIn);
-        findViewById(R.id.button_download_file).setEnabled(isSignedIn);
-        findViewById(R.id.button_download_file_2).setEnabled(isSignedIn);
+        findViewById(R.id.button_list_files).setEnabled(isSignedIn);
     }
 
     @Override
@@ -172,20 +170,13 @@ public class AnonymousAuthActivity extends BaseActivity implements
             signInAnonymously();
         } else if (i == R.id.button_anonymous_sign_out) {
             signOut();
-        } else if (i == R.id.button_download_file) {
-            openDownloadFileActivity();
-        } else if (i == R.id.button_download_file_2) {
-            openDownloadFileActivity2();
+        } else if (i == R.id.button_list_files) {
+            viewFileListActivity();
         }
     }
 
-    private void openDownloadFileActivity() {
-        Intent i = new Intent(this, GraphActivity.class);
-        startActivity(i);
-    }
-
-    private void openDownloadFileActivity2() {
-        Intent i = new Intent(this, Graph2Activity.class);
+    private void viewFileListActivity() {
+        Intent i = new Intent(this, ViewFilesListActivity.class);
         startActivity(i);
     }
 }
