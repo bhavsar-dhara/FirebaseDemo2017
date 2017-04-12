@@ -27,29 +27,23 @@ import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkState
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
-public class ViewFilesListActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
+public class SelectYearActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
         View.OnClickListener {
 
-    private static final String TAG = ViewFilesListActivity.class.getSimpleName();
+    private static final String TAG = SelectYearActivity.class.getSimpleName();
 
     FirebaseDatabase database;
     DatabaseReference myRef;
 
-    Spinner spinner;
-    ArrayAdapter<String> adapter;
-    List<String> fileList = new ArrayList<>();
-
-
-
-    // annotated data -> another spinner to select from data or the annotated file
-//    Spinner spinner5;
-//    ArrayAdapter<String> adapter5;
-//    List<String> fileList5 = new ArrayList<>();
+    // week long or annotated data
+    Spinner spinner1;
+    ArrayAdapter<String> adapter1;
+    List<String> fileList1 = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_files_list);
+        setContentView(R.layout.activity_select_year);
 
         IntentFilter intentFilter = new IntentFilter(NetworkStateChangeReceiver.NETWORK_AVAILABLE_ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
@@ -69,82 +63,44 @@ public class ViewFilesListActivity extends AppCompatActivity implements AdapterV
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
-        findViewById(R.id.button_download_file).setOnClickListener(this);
-        findViewById(R.id.button_download_file_2).setOnClickListener(this);
-
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(this);
+        spinner1 = (Spinner) findViewById(R.id.spinner1);
+        spinner1.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList);
+        adapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList1);
         // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
+        spinner1.setAdapter(adapter1);
 
-        callFileDir();
+        call2017();
+    }
 
-
-
-
-
-//        spinner5 = (Spinner) findViewById(R.id.spinner5);
-//        spinner5.setOnItemSelectedListener(this);
-//        // Create an ArrayAdapter using the string array and a default spinner layout
-//        adapter5 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList);
-//        // Specify the layout to use when the list of choices appears
-//        adapter5.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        // Apply the adapter to the spinner
-//        spinner5.setAdapter(adapter5);
+    @Override
+    public void onClick(View view) {
 
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        findViewById(R.id.button_download_file).setEnabled(true);
-        findViewById(R.id.button_download_file_2).setEnabled(true);
-        Log.d(TAG, "onItemSelected: " + spinner.getSelectedItem().toString());
+
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-        Log.d(TAG, "onNothingSelected: ");
+
     }
 
-    @Override
-    public void onClick(View view) {
-        int i = view.getId();
-        if (i == R.id.button_download_file) {
-            openDownloadFileActivity();
-        } else if (i == R.id.button_download_file_2) {
-            openDownloadFileActivity2();
-        }
-    }
-
-    private void openDownloadFileActivity() {
-        Intent i = new Intent(this, GraphActivity.class);
-        Log.d(TAG, "openDownloadFileActivity: " + spinner.getSelectedItem().toString());
-        i.putExtra("FileName", spinner.getSelectedItem().toString());
-        startActivity(i);
-    }
-
-    private void openDownloadFileActivity2() {
-        Intent i = new Intent(this, Graph2Activity.class);
-        Log.d(TAG, "openDownloadFileActivity2: " + spinner.getSelectedItem().toString());
-        i.putExtra("FileName", spinner.getSelectedItem().toString());
-        startActivity(i);
-    }
-
-    private void callFileDir() {
+    private void call2017() {
         // TODO : add progress spinner till data from database is fetched
-        myRef.child("fileDir").addChildEventListener(new ChildEventListener() {
+        myRef.child("2017").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    fileList.add(snapshot.getValue().toString().replaceAll("_", "."));
+                    fileList1.add(snapshot.getValue().toString().replaceAll("_", "."));
                 }
-                Log.d(TAG, "onChildAdded: size = " + fileList.size());
+                Log.d(TAG, "onChildAdded: size = " + fileList1.size());
 
-                adapter.notifyDataSetChanged();
+                adapter1.notifyDataSetChanged();
             }
 
             @Override

@@ -101,6 +101,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         findViewById(R.id.button_anonymous_sign_in).setOnClickListener(this);
         findViewById(R.id.button_anonymous_sign_out).setOnClickListener(this);
         findViewById(R.id.button_list_files).setOnClickListener(this);
+        findViewById(R.id.button_list_files_2).setOnClickListener(this);
     }
 
     // [START on_start_add_listener]
@@ -161,6 +162,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         findViewById(R.id.button_anonymous_sign_in).setEnabled(!isSignedIn);
         findViewById(R.id.button_anonymous_sign_out).setEnabled(isSignedIn);
         findViewById(R.id.button_list_files).setEnabled(isSignedIn);
+        findViewById(R.id.button_list_files_2).setEnabled(isSignedIn);
     }
 
     @Override
@@ -172,11 +174,18 @@ public class AnonymousAuthActivity extends BaseActivity implements
             signOut();
         } else if (i == R.id.button_list_files) {
             viewFileListActivity();
+        } else if (i == R.id.button_list_files_2) {
+            viewFileListActivity2();
         }
     }
 
     private void viewFileListActivity() {
         Intent i = new Intent(this, ViewFilesListActivity.class);
+        startActivity(i);
+    }
+
+    private void viewFileListActivity2() {
+        Intent i = new Intent(this, SelectYearActivity.class);
         startActivity(i);
     }
 }

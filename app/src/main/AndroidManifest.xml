@@ -49,7 +49,11 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ViewFilesListActivity"></activity>
+        <activity android:name=".ViewFilesListActivity" />
+        <activity android:name=".SelectHourActivity" />
+        <activity android:name=".SelectYearActivity" />
+        <activity android:name=".SelectMonthActivity" />
+        <activity android:name=".SelectDayActivity"></activity>
     </application>
 
 </manifest>

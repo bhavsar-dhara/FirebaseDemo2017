@@ -78,4 +78,12 @@
         android:enabled="false"
         android:text="@string/list_files" />
 
+    <Button
+        android:id="@+id/button_list_files_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_list_files"
+        android:enabled="false"
+        android:text="@string/list_files_2" />
+
 </RelativeLayout>
