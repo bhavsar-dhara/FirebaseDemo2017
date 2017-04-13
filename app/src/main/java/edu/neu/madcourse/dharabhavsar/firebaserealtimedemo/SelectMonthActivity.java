@@ -63,7 +63,7 @@ public class SelectMonthActivity extends AppCompatActivity implements AdapterVie
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
-        spinner2 = (Spinner) findViewById(R.id.spinner2);
+        spinner2 = (Spinner) findViewById(R.id.spinnerSelectMonth);
         spinner2.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter2 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList2);

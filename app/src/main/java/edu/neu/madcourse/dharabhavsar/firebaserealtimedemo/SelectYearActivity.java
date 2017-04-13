@@ -63,7 +63,7 @@ public class SelectYearActivity extends AppCompatActivity implements AdapterView
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
-        spinner1 = (Spinner) findViewById(R.id.spinner1);
+        spinner1 = (Spinner) findViewById(R.id.spinnerSelectType);
         spinner1.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList1);

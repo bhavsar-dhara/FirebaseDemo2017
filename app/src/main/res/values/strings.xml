@@ -17,6 +17,7 @@
     <string name="email_fmt">Email: %s</string>
     <string name="list_files">View file list - Test Data</string>
     <string name="list_files_2">View file list - Week + Annotated Data</string>
+    <string name="list_files_3">View file list - Week + Annotated Data</string>
 
     <string name="quickstart_message">Click the SUBSCRIBE TO NEWS button below to subscribe to the
         news topic. Messages sent to the news topic will be received. The LOG TOKEN button logs the

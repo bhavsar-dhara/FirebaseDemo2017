@@ -53,7 +53,8 @@
         <activity android:name=".SelectHourActivity" />
         <activity android:name=".SelectYearActivity" />
         <activity android:name=".SelectMonthActivity" />
-        <activity android:name=".SelectDayActivity"></activity>
+        <activity android:name=".SelectDayActivity" />
+        <activity android:name=".ViewFileDirActivity"></activity>
     </application>
 
 </manifest>

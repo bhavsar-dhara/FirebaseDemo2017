@@ -39,13 +39,6 @@ public class ViewFilesListActivity extends AppCompatActivity implements AdapterV
     ArrayAdapter<String> adapter;
     List<String> fileList = new ArrayList<>();
 
-
-
-    // annotated data -> another spinner to select from data or the annotated file
-//    Spinner spinner5;
-//    ArrayAdapter<String> adapter5;
-//    List<String> fileList5 = new ArrayList<>();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,20 +75,6 @@ public class ViewFilesListActivity extends AppCompatActivity implements AdapterV
         spinner.setAdapter(adapter);
 
         callFileDir();
-
-
-
-
-
-//        spinner5 = (Spinner) findViewById(R.id.spinner5);
-//        spinner5.setOnItemSelectedListener(this);
-//        // Create an ArrayAdapter using the string array and a default spinner layout
-//        adapter5 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList);
-//        // Specify the layout to use when the list of choices appears
-//        adapter5.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        // Apply the adapter to the spinner
-//        spinner5.setAdapter(adapter5);
-
     }
 
     @Override

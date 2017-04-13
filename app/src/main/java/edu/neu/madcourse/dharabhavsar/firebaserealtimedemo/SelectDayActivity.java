@@ -63,7 +63,7 @@ public class SelectDayActivity extends AppCompatActivity implements AdapterView.
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
-        spinner3 = (Spinner) findViewById(R.id.spinner3);
+        spinner3 = (Spinner) findViewById(R.id.spinnerSelectDay);
         spinner3.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter3 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList3);

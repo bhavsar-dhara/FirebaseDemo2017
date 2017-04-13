@@ -63,7 +63,7 @@ public class SelectHourActivity extends AppCompatActivity implements AdapterView
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
-        spinner4 = (Spinner) findViewById(R.id.spinner4);
+        spinner4 = (Spinner) findViewById(R.id.spinnerSelectHour);
         spinner4.setOnItemSelectedListener(this);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter4 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileList4);
