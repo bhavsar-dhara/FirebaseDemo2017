@@ -8,20 +8,20 @@ import java.util.*;
 
 public class AnnoMonth {
 
-    private Map<Long, AnnoDay> months;
+    private Map<String, AnnoDay> months;
 
     public AnnoMonth() {
     }
 
-    public AnnoMonth(Map<Long, AnnoDay> months) {
+    public AnnoMonth(Map<String, AnnoDay> months) {
         this.months = months;
     }
 
-    public Map<Long, AnnoDay> getMonths() {
+    public Map<String, AnnoDay> getMonths() {
         return months;
     }
 
-    public void setMonths(Map<Long, AnnoDay> months) {
+    public void setMonths(Map<String, AnnoDay> months) {
         this.months = months;
     }
 }

@@ -8,20 +8,20 @@ import java.util.*;
 
 public class AnnoHour {
 
-    private Map<Long, AnnoFileDetails> hours;
+    private Map<String, AnnoFileDetails> hours;
 
     public AnnoHour() {
     }
 
-    public AnnoHour(Map<Long, AnnoFileDetails> hours) {
+    public AnnoHour(Map<String, AnnoFileDetails> hours) {
         this.hours = hours;
     }
 
-    public Map<Long, AnnoFileDetails> getHours() {
+    public Map<String, AnnoFileDetails> getHours() {
         return hours;
     }
 
-    public void setHours(Map<Long, AnnoFileDetails> hours) {
+    public void setHours(Map<String, AnnoFileDetails> hours) {
         this.hours = hours;
     }
 }

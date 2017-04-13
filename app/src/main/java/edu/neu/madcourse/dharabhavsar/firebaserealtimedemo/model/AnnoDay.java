@@ -8,20 +8,20 @@ import java.util.*;
 
 public class AnnoDay {
 
-    private Map<Long, AnnoHour> days;
+    private Map<String, AnnoHour> days;
 
     public AnnoDay() {
     }
 
-    public AnnoDay(Map<Long, AnnoHour> days) {
+    public AnnoDay(Map<String, AnnoHour> days) {
         this.days = days;
     }
 
-    public Map<Long, AnnoHour> getDays() {
+    public Map<String, AnnoHour> getDays() {
         return days;
     }
 
-    public void setDays(Map<Long, AnnoHour> days) {
+    public void setDays(Map<String, AnnoHour> days) {
         this.days = days;
     }
 }
