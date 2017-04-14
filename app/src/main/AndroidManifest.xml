@@ -33,10 +33,6 @@
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".testing.GZIPTest"
-            android:hardwareAccelerated="true"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".Graph2Activity"
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait" />
@@ -50,11 +46,13 @@
         </receiver>
 
         <activity android:name=".ViewFilesListActivity" />
+        <!-- TODO : remove the below four methods -->
         <activity android:name=".SelectHourActivity" />
         <activity android:name=".SelectYearActivity" />
         <activity android:name=".SelectMonthActivity" />
         <activity android:name=".SelectDayActivity" />
-        <activity android:name=".ViewFileDirActivity"></activity>
+        <activity android:name=".ViewFileDirActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

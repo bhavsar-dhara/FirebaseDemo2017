@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -83,6 +82,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     List<Map<String, Object>> monthMapList = new ArrayList<>();
     List<Map<String, Object>> dayMapList = new ArrayList<>();
     List<Map<String, Object>> hoursMapList = new ArrayList<>();
+    List<Map<String, Object>> detailsMapList = new ArrayList<>();
     List<AnnotatedFileDetails> fileDetailsList = new ArrayList<>();
 
     @Override
@@ -114,8 +114,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.d(TAG, "onItemSelected: spinnerSelectType: " + spinnerSelectType.getSelectedItem().toString());
                 if (spinnerSelectType.getSelectedItem().toString().equals("Week-long Data")) {
-//                    TODO call2017();
                     Log.d(TAG, "onItemSelected: week-long");
+                    call2017();
                 } else {
                     Log.d(TAG, "onItemSelected: annotated");
                     call2016();
@@ -140,7 +140,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         spinnerSelectYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "onItemSelected: spinnerSelectMonth: ");
+                Log.d(TAG, "onItemSelected: spinnerSelectYear: " + spinnerSelectYear.getSelectedItem().toString());
                 setMonthSpinner(spinnerSelectYear.getSelectedItem().toString());
             }
 
@@ -160,7 +160,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         spinnerSelectMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "onItemSelected: spinnerSelectMonth: ");
+                Log.d(TAG, "onItemSelected: spinnerSelectMonth: " + spinnerSelectMonth.getSelectedItem().toString());
+                setDaySpinner(spinnerSelectMonth.getSelectedItem().toString());
             }
 
             @Override
@@ -179,7 +180,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         spinnerSelectDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "onItemSelected: spinnerSelectDay: ");
+                Log.d(TAG, "onItemSelected: spinnerSelectDay: " + spinnerSelectDay.getSelectedItem().toString());
+                setHourSpinner(spinnerSelectDay.getSelectedItem().toString());
             }
 
             @Override
@@ -198,7 +200,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         spinnerSelectHour.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "onItemSelected: spinnerSelectHour: ");
+                Log.d(TAG, "onItemSelected: spinnerSelectHour: " + spinnerSelectHour.getSelectedItem().toString());
+                setFileDetailsSpinner(spinnerSelectHour.getSelectedItem().toString());
             }
 
             @Override
@@ -218,6 +221,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.d(TAG, "onItemSelected: spinnerSelectFileType: ");
+                // TODO -> buttons to plot data
             }
 
             @Override
@@ -239,52 +243,10 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void call2017() {
-        // TODO : add progress spinner till data from database is fetched
-        myRef.child("2017").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                adapterSelectMonth.clear();
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    fileListSelectMonth.add(snapshot.getValue().toString().replaceAll("_", "."));
-                }
-                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
-
-                adapterSelectMonth.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled: " + databaseError);
-            }
-
-        });
-    }
-
-    private void call2016() {
-        myRef.child("annotatedData2").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("data").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 adapterSelectYear.clear();
-                adapterSelectMonth.clear();
-                adapterSelectDay.clear();
-                adapterSelectHour.clear();
-                adapterSelectFileType.clear();
 
                 yearMap = (Map<String, Object>) dataSnapshot.getValue();
                 Log.d(TAG, "onDataChange: " + yearMap.size());
@@ -301,10 +263,6 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 //                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
 
                 adapterSelectYear.notifyDataSetChanged();
-                adapterSelectMonth.notifyDataSetChanged();
-                adapterSelectDay.notifyDataSetChanged();
-                adapterSelectHour.notifyDataSetChanged();
-                adapterSelectFileType.notifyDataSetChanged();
             }
 
             @Override
@@ -312,129 +270,119 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
+    }
 
-        // TODO : add progress spinner till data from database is fetched
-//        myRef.child("annotatedData").addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                adapterSelectYear.clear();
-//                adapterSelectMonth.clear();
-//                adapterSelectDay.clear();
-//                adapterSelectHour.clear();
-//                adapterSelectFileType.clear();
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    Log.d(TAG, "onChildAdded;;: " + dataSnapshot.getChildrenCount());
-//                    yearDir = snapshot.getValue(AnnoYear.class);
-//                }
-//                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
-//
-////                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-////                    years = snapshot.getValue(AnnotatedYears.class);
-////                }
-////                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
-////
-////                for (AnnotatedYear year : years.getYears()) {
-////                    for (Map.Entry<Long, AnnotatedMonths> yearEntry : year.getYear().entrySet()) {
-////                        Log.e(TAG, "onChildAdded:yearEntry " + yearEntry.getKey().toString());
-////                        fileListSelectYear.add(yearEntry.getKey().toString());
-////                        months = yearEntry.getValue();
-////                        for (AnnotatedMonth month : months.getMonths()) {
-////                            for (Map.Entry<Long, AnnotatedDays> monthEntry : month.getMonth().entrySet()) {
-////                                Log.e(TAG, "onChildAdded:monthEntry " + monthEntry.getKey().toString());
-////                                fileListSelectMonth.add(monthEntry.getKey().toString());
-////                                days = monthEntry.getValue();
-////                                for (AnnotatedDay day : days.getDays()) {
-////                                    for (Map.Entry<Long, AnnotatedHours> dayEntry : day.getDay().entrySet()) {
-////                                        Log.e(TAG, "onChildAdded:dayEntry " + dayEntry.getKey().toString());
-////                                        fileListSelectDay.add(dayEntry.getKey().toString());
-////                                        hours = dayEntry.getValue();
-////                                        for (AnnotatedHour hour : hours.getHours()) {
-////                                            for (Map.Entry<Long, AnnotatedFileDetails> hourEntry : hour.getHour().entrySet()) {
-////                                                Log.e(TAG, "onChildAdded:hourEntry " + hourEntry.getKey().toString());
-////                                                fileListSelectHour.add(hourEntry.getKey().toString());
-////                                                fileDetails = hourEntry.getValue();
-////                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getData());
-////                                                fileListSelectFileType.add(fileDetails.getData());
-////                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getAnnotation());
-////                                                fileListSelectFileType.add(fileDetails.getAnnotation());
-////                                            }
-////                                        }
-////                                    }
-////                                }
-////                            }
-////                        }
-////                    }
-////                }
-//
-//                adapterSelectYear.notifyDataSetChanged();
-//                adapterSelectMonth.notifyDataSetChanged();
-//                adapterSelectDay.notifyDataSetChanged();
-//                adapterSelectHour.notifyDataSetChanged();
-//                adapterSelectFileType.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.e(TAG, "onCancelled: " + databaseError);
-//            }
-//
-//        });
+    private void call2016() {
+        myRef.child("annotatedData2").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                adapterSelectYear.clear();
+
+                yearMap = (Map<String, Object>) dataSnapshot.getValue();
+                Log.d(TAG, "onDataChange: " + yearMap.size());
+//                Log.d(TAG, "onDataChange: " + yearMap.keySet().toString());
+                for (Map.Entry<String, Object> yearEntry : yearMap.entrySet()) {
+                    Log.d(TAG, "onDataChange:....... " + yearEntry.getKey());
+                    fileListSelectYear.add(yearEntry.getKey());
+                    Map<String, Object> testMon = (Map<String, Object>) yearEntry.getValue();
+
+                    monthMapList.add(testMon);
+                }
+
+//                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");
+//                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
+
+                adapterSelectYear.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void setMonthSpinner(String selectedYear) {
+        adapterSelectMonth.clear();
         Map<String, Object> testMon = (Map<String, Object>) yearMap.get(selectedYear);
         for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
             fileListSelectMonth.add(monthEntry.getKey());
             Map<String, Object> testDay = (Map<String, Object>) monthEntry.getValue();
-
+            Log.d(TAG, "setMonthSpinner: " + monthEntry.getKey());
             dayMapList.add(testDay);
         }
+        adapterSelectMonth.notifyDataSetChanged();
     }
 
-//    private void setDaySpinner(String selectedMonth) {
-//        Map<String, Object> testDay = (Map<String, Object>) monthMapList.get(selectedMonth);
-//        for (Map.Entry<String, Object> dayEntry : testDay.entrySet()) {
-//            fileListSelectDay.add(dayEntry.getKey());
-//            Map<String, Object> testHour = (Map<String, Object>) testDay.get(dayEntry.getValue());
-//
-//            hoursMapList.add(testHour);
-//        }
-//    }
+    private void setDaySpinner(String selectedMonth) {
+        adapterSelectDay.clear();
+        Map<String, Object> testDay = null;
+        for (Map<String, Object> mapObj : monthMapList) {
+            if (mapObj.containsKey(selectedMonth)) {
+                testDay = (Map<String, Object>) mapObj.get(selectedMonth);
+                Log.d(TAG, "setDaySpinner: " + testDay.size() + " .... " + testDay.keySet().toString() + " .. " + testDay.values().toString());
+            }
+        }
+        if (testDay != null) {
+            for (Map.Entry<String, Object> dayEntry : testDay.entrySet()) {
+                fileListSelectDay.add(dayEntry.getKey());
+                Map<String, Object> testHour = (Map<String, Object>) dayEntry.getValue();
+                Log.d(TAG, "setDaySpinner: " + dayEntry.getKey());
+                hoursMapList.add(testHour);
+            }
+        } else {
+            Log.e(TAG, "setDaySpinner: Oops something went wrong.....NPE");
+        }
+        adapterSelectDay.notifyDataSetChanged();
+    }
 
-//    private void setHourSpinner() {
-//        for (Map.Entry<String, Object> hourEntry : testHour.entrySet()) {
-//            fileListSelectHour.add(hourEntry.getKey());
-//            Map<String, Object> testFileDetails = (Map<String, Object>) testHour.get(hourEntry.getValue());
-//
-//            hoursMapList.add(testFileDetails);
-//        }
-//    }
-//
-//    private void setFileDetailsSpinner() {
-//        for (Map.Entry<String, Object> detailEntry : testFileDetails.entrySet()) {
-//            fileListSelectFileType.add(detailEntry.getValue().toString());
-//            AnnotatedFileDetails testDetails = new AnnotatedFileDetails();
-//            if (detailEntry.getKey().equals("annotation")) {
-//                testDetails.setAnnotation(detailEntry.getValue().toString());
-//            } else {
-//                testDetails.setData(detailEntry.getValue().toString());
-//            }
-//            fileDetailsList.add(testDetails);
-//        }
-//    }
+    private void setHourSpinner(String selectedDay) {
+        adapterSelectHour.clear();
+        Map<String, Object> testHour = null;
+        for (Map<String, Object> mapObj : dayMapList) {
+            if (mapObj.containsKey(selectedDay)) {
+                testHour = (Map<String, Object>) mapObj.get(selectedDay);
+                Log.d(TAG, "setHourSpinner: " + testHour.size() + " .... " + testHour.keySet().toString() + " .. " + testHour.values().toString());
+            }
+        }
+        if (testHour != null) {
+            for (Map.Entry<String, Object> hourEntry : testHour.entrySet()) {
+                fileListSelectHour.add(hourEntry.getKey());
+                Map<String, Object> testFileDetails = (Map<String, Object>) hourEntry.getValue();
+                Log.d(TAG, "setHourSpinner: " + hourEntry.getKey());
+                detailsMapList.add(testFileDetails);
+            }
+        } else {
+            Log.e(TAG, "setHourSpinner: Oops something went wrong.....NPE");
+        }
+        adapterSelectHour.notifyDataSetChanged();
+    }
+
+    private void setFileDetailsSpinner(String selectedHour) {
+        adapterSelectFileType.clear();
+        Map<String, Object> testDetails = null;
+        for (Map<String, Object> mapObj : hoursMapList) {
+            if (mapObj.containsKey(selectedHour)) {
+                testDetails = (Map<String, Object>) mapObj.get(selectedHour);
+                Log.d(TAG, "setFileDetailsSpinner: " + testDetails.size() + " .... " + testDetails.keySet().toString() + " .. " + testDetails.values().toString());
+            }
+        }
+        if (testDetails != null) {
+            for (Map.Entry<String, Object> detailEntry : testDetails.entrySet()) {
+                Log.d(TAG, "setFileDetailsSpinner: " + detailEntry.getKey());
+                AnnotatedFileDetails fileDetails = new AnnotatedFileDetails();
+                if (detailEntry.getKey().equals("annotation")) {
+                    fileDetails.setAnnotation(detailEntry.getValue().toString());
+                    fileListSelectFileType.add(fileDetails.getAnnotation());
+                } else {
+                    fileDetails.setData(detailEntry.getValue().toString());
+                    fileListSelectFileType.add(fileDetails.getData());
+                }
+                fileDetailsList.add(fileDetails);
+            }
+        } else {
+            Log.e(TAG, "setFileDetailsSpinner: Oops something went wrong.....NPE");
+        }
+        adapterSelectFileType.notifyDataSetChanged();
+    }
 }
