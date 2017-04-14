@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,17 +66,17 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     private ArrayAdapter<String> adapterSelectFileType;
     private List<String> fileListSelectFileType = new ArrayList<>();
 
-    Map<String, Object> testMon = null;
-    Map<String, Object> testDay = null;
-    Map<String, Object> testHour = null;
-    Map<String, Object> testDetails = null;
+    private Map<String, Object> testMon = null;
+    private Map<String, Object> testDay = null;
+    private Map<String, Object> testHour = null;
+    private Map<String, Object> testDetails = null;
 
-    Map<String, Object> yearMap;
-    List<Map<String, Object>> monthMapList = new ArrayList<>();
-    List<Map<String, Object>> dayMapList = new ArrayList<>();
-    List<Map<String, Object>> hoursMapList = new ArrayList<>();
-    List<Map<String, Object>> detailsMapList = new ArrayList<>();
-    List<AnnotatedFileDetails> fileDetailsList = new ArrayList<>();
+    private Map<String, Object> yearMap;
+    private List<Map<String, Object>> monthMapList = new ArrayList<>();
+    private List<Map<String, Object>> dayMapList = new ArrayList<>();
+    private List<Map<String, Object>> hoursMapList = new ArrayList<>();
+    private List<Map<String, Object>> detailsMapList = new ArrayList<>();
+    private List<AnnotatedFileDetails> fileDetailsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         myRef = database.getReference();
 
         spinnerSelectType = (Spinner) findViewById(R.id.spinnerSelectType);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+//        adapterSelectMonth = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectType);
+        adapterSelectType = ArrayAdapter.createFromResource(this, R.array.filetype_array,
+                android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectType.setAdapter(adapterSelectType);
         spinnerSelectType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -119,16 +128,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectType: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-//        adapterSelectMonth = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectType);
-        adapterSelectType = ArrayAdapter.createFromResource(this, R.array.filetype_array,
-                android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectType.setAdapter(adapterSelectType);
 
         spinnerSelectYear = (Spinner) findViewById(R.id.spinnerSelectYear);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapterSelectYear = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectYear);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectYear.setAdapter(adapterSelectYear);
         spinnerSelectYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -141,14 +148,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectMonth: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapterSelectYear = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectYear);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectYear.setAdapter(adapterSelectYear);
 
         spinnerSelectMonth = (Spinner) findViewById(R.id.spinnerSelectMonth);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapterSelectMonth = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectMonth);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectMonth.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectMonth.setAdapter(adapterSelectMonth);
         spinnerSelectMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -161,14 +168,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectMonth: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapterSelectMonth = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectMonth);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectMonth.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectMonth.setAdapter(adapterSelectMonth);
 
         spinnerSelectDay = (Spinner) findViewById(R.id.spinnerSelectDay);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapterSelectDay = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectDay);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectDay.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectDay.setAdapter(adapterSelectDay);
         spinnerSelectDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -181,14 +188,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectDay: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapterSelectDay = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectDay);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectDay.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectDay.setAdapter(adapterSelectDay);
 
         spinnerSelectHour = (Spinner) findViewById(R.id.spinnerSelectHour);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapterSelectHour = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectHour);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectHour.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectHour.setAdapter(adapterSelectHour);
         spinnerSelectHour.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -201,14 +208,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectHour: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapterSelectHour = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectHour);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectHour.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectHour.setAdapter(adapterSelectHour);
 
         spinnerSelectFileType = (Spinner) findViewById(R.id.spinnerSelectFileType);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        adapterSelectFileType = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectFileType);
+        // Specify the layout to use when the list of choices appears
+        adapterSelectFileType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerSelectFileType.setAdapter(adapterSelectFileType);
         spinnerSelectFileType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -221,12 +228,6 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "onNothingSelected: spinnerSelectFileType: ");
             }
         });
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        adapterSelectFileType = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectFileType);
-        // Specify the layout to use when the list of choices appears
-        adapterSelectFileType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinnerSelectFileType.setAdapter(adapterSelectFileType);
     }
 
     @Override
@@ -254,7 +255,9 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 //                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");
 //                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
 
+                Collections.sort(fileListSelectYear);
                 adapterSelectYear.notifyDataSetChanged();
+                spinnerSelectYear.setSelection(0);
             }
 
             @Override
@@ -283,8 +286,9 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
 //                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");
 //                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
-
+                Collections.sort(fileListSelectYear);
                 adapterSelectYear.notifyDataSetChanged();
+                spinnerSelectYear.setSelection(0);
             }
 
             @Override
@@ -296,7 +300,6 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setMonthSpinner(String selectedYear) {
         adapterSelectMonth.clear();
-//        Map<String, Object> testMon = (Map<String, Object>) yearMap.get(selectedYear);
         testMon = (Map<String, Object>) yearMap.get(selectedYear);
         for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
             fileListSelectMonth.add(monthEntry.getKey());
@@ -304,6 +307,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             Log.d(TAG, "setMonthSpinner: " + monthEntry.getKey());
             dayMapList.add(testDay);
         }
+        Collections.sort(fileListSelectMonth);
+        spinnerSelectMonth.setSelection(0);
         adapterSelectMonth.notifyDataSetChanged();
     }
 
@@ -324,6 +329,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         } else {
             Log.e(TAG, "setDaySpinner: Oops something went wrong.....NPE");
         }
+        Collections.sort(fileListSelectDay);
+        spinnerSelectDay.setSelection(0);
         adapterSelectDay.notifyDataSetChanged();
     }
 
@@ -344,6 +351,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         } else {
             Log.e(TAG, "setHourSpinner: Oops something went wrong.....NPE");
         }
+        Collections.sort(fileListSelectHour);
+        spinnerSelectHour.setSelection(0);
         adapterSelectHour.notifyDataSetChanged();
     }
 
@@ -370,6 +379,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         } else {
             Log.e(TAG, "setFileDetailsSpinner: Oops something went wrong.....NPE");
         }
+        Collections.sort(fileListSelectFileType);
+        spinnerSelectFileType.setSelection(0);
         adapterSelectFileType.notifyDataSetChanged();
     }
 }
