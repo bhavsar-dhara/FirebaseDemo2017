@@ -19,9 +19,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnoYear;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedDays;
@@ -268,86 +270,110 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void call2016() {
-        // TODO : add progress spinner till data from database is fetched
-        myRef.child("annotatedData").addChildEventListener(new ChildEventListener() {
+//        myRef.child("annotatedData").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("annotatedData2").addListenerForSingleValueEvent(new ValueEventListener() {
+            String result = "...";
+            Map<String, Object> test;
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                adapterSelectYear.clear();
-                adapterSelectMonth.clear();
-                adapterSelectDay.clear();
-                adapterSelectHour.clear();
-                adapterSelectFileType.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Log.d(TAG, "onChildAdded;;: " + dataSnapshot.getChildrenCount());
-                    yearDir = snapshot.getValue(AnnoYear.class);
-                }
-                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
 //                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    years = snapshot.getValue(AnnotatedYears.class);
+//                    Log.d(TAG, "onChildAdded;;: " + dataSnapshot.getChildrenCount());
+////                    result = snapshot.getValue().toString();
+//                    test = (Map<String, Object>) snapshot.getValue();
 //                }
-//                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
-//
-//                for (AnnotatedYear year : years.getYears()) {
-//                    for (Map.Entry<Long, AnnotatedMonths> yearEntry : year.getYear().entrySet()) {
-//                        Log.e(TAG, "onChildAdded:yearEntry " + yearEntry.getKey().toString());
-//                        fileListSelectYear.add(yearEntry.getKey().toString());
-//                        months = yearEntry.getValue();
-//                        for (AnnotatedMonth month : months.getMonths()) {
-//                            for (Map.Entry<Long, AnnotatedDays> monthEntry : month.getMonth().entrySet()) {
-//                                Log.e(TAG, "onChildAdded:monthEntry " + monthEntry.getKey().toString());
-//                                fileListSelectMonth.add(monthEntry.getKey().toString());
-//                                days = monthEntry.getValue();
-//                                for (AnnotatedDay day : days.getDays()) {
-//                                    for (Map.Entry<Long, AnnotatedHours> dayEntry : day.getDay().entrySet()) {
-//                                        Log.e(TAG, "onChildAdded:dayEntry " + dayEntry.getKey().toString());
-//                                        fileListSelectDay.add(dayEntry.getKey().toString());
-//                                        hours = dayEntry.getValue();
-//                                        for (AnnotatedHour hour : hours.getHours()) {
-//                                            for (Map.Entry<Long, AnnotatedFileDetails> hourEntry : hour.getHour().entrySet()) {
-//                                                Log.e(TAG, "onChildAdded:hourEntry " + hourEntry.getKey().toString());
-//                                                fileListSelectHour.add(hourEntry.getKey().toString());
-//                                                fileDetails = hourEntry.getValue();
-//                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getData());
-//                                                fileListSelectFileType.add(fileDetails.getData());
-//                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getAnnotation());
-//                                                fileListSelectFileType.add(fileDetails.getAnnotation());
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-                adapterSelectYear.notifyDataSetChanged();
-                adapterSelectMonth.notifyDataSetChanged();
-                adapterSelectDay.notifyDataSetChanged();
-                adapterSelectHour.notifyDataSetChanged();
-                adapterSelectFileType.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                test = (Map<String, Object>) dataSnapshot.getValue();
+                Log.d(TAG, "onDataChange: " + test.size());
+                Log.d(TAG, "onDataChange: " + test.keySet().toString());
+                Map<String, Object> testMon = (Map<String, Object>) test.get("2016");
+                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled: " + databaseError);
-            }
 
+            }
         });
+
+        // TODO : add progress spinner till data from database is fetched
+//        myRef.child("annotatedData").addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                adapterSelectYear.clear();
+//                adapterSelectMonth.clear();
+//                adapterSelectDay.clear();
+//                adapterSelectHour.clear();
+//                adapterSelectFileType.clear();
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//                    Log.d(TAG, "onChildAdded;;: " + dataSnapshot.getChildrenCount());
+//                    yearDir = snapshot.getValue(AnnoYear.class);
+//                }
+//                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
+//
+////                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+////                    years = snapshot.getValue(AnnotatedYears.class);
+////                }
+////                Log.d(TAG, "onChildAdded: size = " + fileListSelectMonth.size());
+////
+////                for (AnnotatedYear year : years.getYears()) {
+////                    for (Map.Entry<Long, AnnotatedMonths> yearEntry : year.getYear().entrySet()) {
+////                        Log.e(TAG, "onChildAdded:yearEntry " + yearEntry.getKey().toString());
+////                        fileListSelectYear.add(yearEntry.getKey().toString());
+////                        months = yearEntry.getValue();
+////                        for (AnnotatedMonth month : months.getMonths()) {
+////                            for (Map.Entry<Long, AnnotatedDays> monthEntry : month.getMonth().entrySet()) {
+////                                Log.e(TAG, "onChildAdded:monthEntry " + monthEntry.getKey().toString());
+////                                fileListSelectMonth.add(monthEntry.getKey().toString());
+////                                days = monthEntry.getValue();
+////                                for (AnnotatedDay day : days.getDays()) {
+////                                    for (Map.Entry<Long, AnnotatedHours> dayEntry : day.getDay().entrySet()) {
+////                                        Log.e(TAG, "onChildAdded:dayEntry " + dayEntry.getKey().toString());
+////                                        fileListSelectDay.add(dayEntry.getKey().toString());
+////                                        hours = dayEntry.getValue();
+////                                        for (AnnotatedHour hour : hours.getHours()) {
+////                                            for (Map.Entry<Long, AnnotatedFileDetails> hourEntry : hour.getHour().entrySet()) {
+////                                                Log.e(TAG, "onChildAdded:hourEntry " + hourEntry.getKey().toString());
+////                                                fileListSelectHour.add(hourEntry.getKey().toString());
+////                                                fileDetails = hourEntry.getValue();
+////                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getData());
+////                                                fileListSelectFileType.add(fileDetails.getData());
+////                                                Log.e(TAG, "onChildAdded:hourEntry " + fileDetails.getAnnotation());
+////                                                fileListSelectFileType.add(fileDetails.getAnnotation());
+////                                            }
+////                                        }
+////                                    }
+////                                }
+////                            }
+////                        }
+////                    }
+////                }
+//
+//                adapterSelectYear.notifyDataSetChanged();
+//                adapterSelectMonth.notifyDataSetChanged();
+//                adapterSelectDay.notifyDataSetChanged();
+//                adapterSelectHour.notifyDataSetChanged();
+//                adapterSelectFileType.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.e(TAG, "onCancelled: " + databaseError);
+//            }
+//
+//        });
     }
 }
