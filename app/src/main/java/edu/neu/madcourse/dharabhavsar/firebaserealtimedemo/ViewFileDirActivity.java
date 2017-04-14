@@ -79,6 +79,12 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     AnnoYear yearDir;
 
+    Map<String, Object> yearMap;
+    List<Map<String, Object>> monthMapList = new ArrayList<>();
+    List<Map<String, Object>> dayMapList = new ArrayList<>();
+    List<Map<String, Object>> hoursMapList = new ArrayList<>();
+    List<AnnotatedFileDetails> fileDetailsList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -135,6 +141,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.d(TAG, "onItemSelected: spinnerSelectMonth: ");
+                setMonthSpinner(spinnerSelectYear.getSelectedItem().toString());
             }
 
             @Override
@@ -270,22 +277,34 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void call2016() {
-//        myRef.child("annotatedData").addListenerForSingleValueEvent(new ValueEventListener() {
         myRef.child("annotatedData2").addListenerForSingleValueEvent(new ValueEventListener() {
-            String result = "...";
-            Map<String, Object> test;
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    Log.d(TAG, "onChildAdded;;: " + dataSnapshot.getChildrenCount());
-////                    result = snapshot.getValue().toString();
-//                    test = (Map<String, Object>) snapshot.getValue();
-//                }
-                test = (Map<String, Object>) dataSnapshot.getValue();
-                Log.d(TAG, "onDataChange: " + test.size());
-                Log.d(TAG, "onDataChange: " + test.keySet().toString());
-                Map<String, Object> testMon = (Map<String, Object>) test.get("2016");
-                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
+                adapterSelectYear.clear();
+                adapterSelectMonth.clear();
+                adapterSelectDay.clear();
+                adapterSelectHour.clear();
+                adapterSelectFileType.clear();
+
+                yearMap = (Map<String, Object>) dataSnapshot.getValue();
+                Log.d(TAG, "onDataChange: " + yearMap.size());
+//                Log.d(TAG, "onDataChange: " + yearMap.keySet().toString());
+                for (Map.Entry<String, Object> yearEntry : yearMap.entrySet()) {
+                    Log.d(TAG, "onDataChange:....... " + yearEntry.getKey());
+                    fileListSelectYear.add(yearEntry.getKey());
+                    Map<String, Object> testMon = (Map<String, Object>) yearEntry.getValue();
+
+                    monthMapList.add(testMon);
+                }
+
+//                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");
+//                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
+
+                adapterSelectYear.notifyDataSetChanged();
+                adapterSelectMonth.notifyDataSetChanged();
+                adapterSelectDay.notifyDataSetChanged();
+                adapterSelectHour.notifyDataSetChanged();
+                adapterSelectFileType.notifyDataSetChanged();
             }
 
             @Override
@@ -376,4 +395,46 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 //
 //        });
     }
+
+    private void setMonthSpinner(String selectedYear) {
+        Map<String, Object> testMon = (Map<String, Object>) yearMap.get(selectedYear);
+        for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
+            fileListSelectMonth.add(monthEntry.getKey());
+            Map<String, Object> testDay = (Map<String, Object>) monthEntry.getValue();
+
+            dayMapList.add(testDay);
+        }
+    }
+
+//    private void setDaySpinner(String selectedMonth) {
+//        Map<String, Object> testDay = (Map<String, Object>) monthMapList.get(selectedMonth);
+//        for (Map.Entry<String, Object> dayEntry : testDay.entrySet()) {
+//            fileListSelectDay.add(dayEntry.getKey());
+//            Map<String, Object> testHour = (Map<String, Object>) testDay.get(dayEntry.getValue());
+//
+//            hoursMapList.add(testHour);
+//        }
+//    }
+
+//    private void setHourSpinner() {
+//        for (Map.Entry<String, Object> hourEntry : testHour.entrySet()) {
+//            fileListSelectHour.add(hourEntry.getKey());
+//            Map<String, Object> testFileDetails = (Map<String, Object>) testHour.get(hourEntry.getValue());
+//
+//            hoursMapList.add(testFileDetails);
+//        }
+//    }
+//
+//    private void setFileDetailsSpinner() {
+//        for (Map.Entry<String, Object> detailEntry : testFileDetails.entrySet()) {
+//            fileListSelectFileType.add(detailEntry.getValue().toString());
+//            AnnotatedFileDetails testDetails = new AnnotatedFileDetails();
+//            if (detailEntry.getKey().equals("annotation")) {
+//                testDetails.setAnnotation(detailEntry.getValue().toString());
+//            } else {
+//                testDetails.setData(detailEntry.getValue().toString());
+//            }
+//            fileDetailsList.add(testDetails);
+//        }
+//    }
 }
