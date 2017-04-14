@@ -24,12 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnoYear;
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedDays;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedFileDetails;
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedHours;
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedMonths;
-import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedYears;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
@@ -70,13 +65,10 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
     private ArrayAdapter<String> adapterSelectFileType;
     private List<String> fileListSelectFileType = new ArrayList<>();
 
-    AnnotatedYears years = new AnnotatedYears();
-    AnnotatedMonths months = new AnnotatedMonths();
-    AnnotatedDays days = new AnnotatedDays();
-    AnnotatedHours hours = new AnnotatedHours();
-    AnnotatedFileDetails fileDetails = new AnnotatedFileDetails();
-
-    AnnoYear yearDir;
+    Map<String, Object> testMon = null;
+    Map<String, Object> testDay = null;
+    Map<String, Object> testHour = null;
+    Map<String, Object> testDetails = null;
 
     Map<String, Object> yearMap;
     List<Map<String, Object>> monthMapList = new ArrayList<>();
@@ -304,7 +296,8 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setMonthSpinner(String selectedYear) {
         adapterSelectMonth.clear();
-        Map<String, Object> testMon = (Map<String, Object>) yearMap.get(selectedYear);
+//        Map<String, Object> testMon = (Map<String, Object>) yearMap.get(selectedYear);
+        testMon = (Map<String, Object>) yearMap.get(selectedYear);
         for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
             fileListSelectMonth.add(monthEntry.getKey());
             Map<String, Object> testDay = (Map<String, Object>) monthEntry.getValue();
@@ -316,11 +309,9 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setDaySpinner(String selectedMonth) {
         adapterSelectDay.clear();
-        Map<String, Object> testDay = null;
-        for (Map<String, Object> mapObj : monthMapList) {
-            if (mapObj.containsKey(selectedMonth)) {
-                testDay = (Map<String, Object>) mapObj.get(selectedMonth);
-                Log.d(TAG, "setDaySpinner: " + testDay.size() + " .... " + testDay.keySet().toString() + " .. " + testDay.values().toString());
+        for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
+            if(monthEntry.getKey().equals(selectedMonth)) {
+                testDay = (Map<String, Object>) monthEntry.getValue();
             }
         }
         if (testDay != null) {
@@ -338,11 +329,9 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setHourSpinner(String selectedDay) {
         adapterSelectHour.clear();
-        Map<String, Object> testHour = null;
-        for (Map<String, Object> mapObj : dayMapList) {
-            if (mapObj.containsKey(selectedDay)) {
-                testHour = (Map<String, Object>) mapObj.get(selectedDay);
-                Log.d(TAG, "setHourSpinner: " + testHour.size() + " .... " + testHour.keySet().toString() + " .. " + testHour.values().toString());
+        for (Map.Entry<String, Object> dayEntry : testDay.entrySet()) {
+            if(dayEntry.getKey().equals(selectedDay)) {
+                testHour = (Map<String, Object>) dayEntry.getValue();
             }
         }
         if (testHour != null) {
@@ -360,16 +349,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setFileDetailsSpinner(String selectedHour) {
         adapterSelectFileType.clear();
-        Map<String, Object> testDetails = null;
-        for (Map<String, Object> mapObj : hoursMapList) {
-            if (mapObj.containsKey(selectedHour)) {
-                testDetails = (Map<String, Object>) mapObj.get(selectedHour);
-                Log.d(TAG, "setFileDetailsSpinner: " + testDetails.size() + " .... " + testDetails.keySet().toString() + " .. " + testDetails.values().toString());
+        for (Map.Entry<String, Object> hourEntry : testHour.entrySet()) {
+            if(hourEntry.getKey().equals(selectedHour)) {
+                testDetails = (Map<String, Object>) hourEntry.getValue();
             }
         }
         if (testDetails != null) {
             for (Map.Entry<String, Object> detailEntry : testDetails.entrySet()) {
-                Log.d(TAG, "setFileDetailsSpinner: " + detailEntry.getKey());
+                Log.d(TAG, "setFileDetailsSpinner: " + detailEntry.getValue().toString());
                 AnnotatedFileDetails fileDetails = new AnnotatedFileDetails();
                 if (detailEntry.getKey().equals("annotation")) {
                     fileDetails.setAnnotation(detailEntry.getValue().toString());
