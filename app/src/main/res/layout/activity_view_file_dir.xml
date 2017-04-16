@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.SelectYearActivity">
+    tools:context="edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.ViewFileDirActivity">
 
     <TextView
         android:id="@+id/editText"
@@ -72,5 +73,21 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/spinnerSelectHour"
         android:layout_marginTop="17dp" />
+
+    <Button
+        android:id="@+id/button_download_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/spinnerSelectFileType"
+        android:enabled="false"
+        android:text="@string/download_file" />
+
+    <Button
+        android:id="@+id/button_download_file_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_download_file"
+        android:enabled="false"
+        android:text="@string/download_file_2" />
 
 </RelativeLayout>

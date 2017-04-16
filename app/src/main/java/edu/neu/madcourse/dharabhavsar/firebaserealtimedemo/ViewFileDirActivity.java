@@ -101,6 +101,9 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
 
+        findViewById(R.id.button_download_file).setOnClickListener(this);
+        findViewById(R.id.button_download_file_2).setOnClickListener(this);
+
         spinnerSelectType = (Spinner) findViewById(R.id.spinnerSelectType);
         // Create an ArrayAdapter using the string array and a default spinner layout
 //        adapterSelectMonth = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, fileListSelectType);
@@ -110,6 +113,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectType.setAdapter(adapterSelectType);
+        spinnerSelectType.setSelection(0, false);
         spinnerSelectType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -136,6 +140,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectYear.setAdapter(adapterSelectYear);
+        spinnerSelectYear.setSelection(0, false);
         spinnerSelectYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -156,6 +161,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectMonth.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectMonth.setAdapter(adapterSelectMonth);
+        spinnerSelectMonth.setSelection(0, false);
         spinnerSelectMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -176,6 +182,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectDay.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectDay.setAdapter(adapterSelectDay);
+        spinnerSelectDay.setSelection(0, false);
         spinnerSelectDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -196,6 +203,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectHour.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectHour.setAdapter(adapterSelectHour);
+        spinnerSelectHour.setSelection(0, false);
         spinnerSelectHour.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -216,11 +224,12 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
         adapterSelectFileType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinnerSelectFileType.setAdapter(adapterSelectFileType);
+        spinnerSelectFileType.setSelection(0, false);
         spinnerSelectFileType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "onItemSelected: spinnerSelectFileType: ");
-                // TODO -> buttons to plot data
+                Log.d(TAG, "onItemSelected: spinnerSelectFileType: " + spinnerSelectFileType.getSelectedItem().toString());
+                enableButtons();
             }
 
             @Override
@@ -232,7 +241,48 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View view) {
+        int i = view.getId();
+        if (i == R.id.button_download_file) {
+            openDownloadFileActivity();
+        } else if (i == R.id.button_download_file_2) {
+            openDownloadFileActivity2();
+        }
+    }
 
+    private void openDownloadFileActivity() {
+        if (spinnerSelectFileType.getSelectedItem().toString().contains("sensor")) {
+            Intent i = new Intent(this, GraphActivity.class);
+            String fileName = spinnerSelectYear.getSelectedItem().toString() + "/"
+                    + spinnerSelectMonth.getSelectedItem().toString() + "/"
+                    + spinnerSelectDay.getSelectedItem().toString() + "/"
+                    + spinnerSelectHour.getSelectedItem().toString() + "/"
+                    + spinnerSelectFileType.getSelectedItem().toString();
+            Log.d(TAG, "openDownloadFileActivity: " + fileName);
+            i.putExtra("FileName", fileName);
+            startActivity(i);
+        } else {
+            Log.d(TAG, "openDownloadFileActivity: reading annotated....");
+//            Intent i = new Intent(this,. class);
+//            startActivity(i);
+        }
+    }
+
+    private void openDownloadFileActivity2() {
+        if (spinnerSelectFileType.getSelectedItem().toString().contains("sensor")) {
+            Intent i = new Intent(this, Graph2Activity.class);
+            String fileName = spinnerSelectYear.getSelectedItem().toString() + "/"
+                    + spinnerSelectMonth.getSelectedItem().toString() + "/"
+                    + spinnerSelectDay.getSelectedItem().toString() + "/"
+                    + spinnerSelectHour.getSelectedItem().toString() + "/"
+                    + spinnerSelectFileType.getSelectedItem().toString();
+            Log.d(TAG, "openDownloadFileActivity2: " + fileName);
+            i.putExtra("FileName", fileName);
+            startActivity(i);
+        } else {
+            Log.d(TAG, "openDownloadFileActivity: reading annotated....");
+//            Intent i = new Intent(this,. class);
+//            startActivity(i);
+        }
     }
 
     private void call2017() {
@@ -252,12 +302,14 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
                     monthMapList.add(testMon);
                 }
 
-//                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");
-//                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
-
-                Collections.sort(fileListSelectYear);
+//                Map<String, Object> testMon = (Map<String, Object>) yearMap.get("2016");ig
                 adapterSelectYear.notifyDataSetChanged();
-                spinnerSelectYear.setSelection(0);
+                if (!spinnerSelectYear.isSelected()) {
+//                    TODO : remove below log
+                    Log.d(TAG, "onDataChange: it goes or not....");
+                    spinnerSelectYear.setSelection(0, false);
+                    setMonthSpinner(spinnerSelectYear.getSelectedItem().toString());
+                }
             }
 
             @Override
@@ -288,7 +340,12 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 //                Log.d(TAG, "onDataChange: " + testMon.keySet().toString());
                 Collections.sort(fileListSelectYear);
                 adapterSelectYear.notifyDataSetChanged();
-                spinnerSelectYear.setSelection(0);
+                if (!spinnerSelectYear.isSelected()) {
+//                    TODO : remove below log
+                    Log.d(TAG, "onDataChange: it goes or not....");
+                    spinnerSelectYear.setSelection(0, false);
+                    setMonthSpinner(spinnerSelectYear.getSelectedItem().toString());
+                }
             }
 
             @Override
@@ -300,6 +357,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
 
     private void setMonthSpinner(String selectedYear) {
         adapterSelectMonth.clear();
+        fileListSelectMonth.clear();
         testMon = (Map<String, Object>) yearMap.get(selectedYear);
         for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
             fileListSelectMonth.add(monthEntry.getKey());
@@ -308,14 +366,20 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             dayMapList.add(testDay);
         }
         Collections.sort(fileListSelectMonth);
-        spinnerSelectMonth.setSelection(0);
         adapterSelectMonth.notifyDataSetChanged();
+        if (!spinnerSelectMonth.isSelected()) {
+//                    TODO : remove below log
+            Log.d(TAG, "onDataChange: it goes or not....");
+            spinnerSelectMonth.setSelection(0, false);
+            setDaySpinner(spinnerSelectMonth.getSelectedItem().toString());
+        }
     }
 
     private void setDaySpinner(String selectedMonth) {
         adapterSelectDay.clear();
+        fileListSelectHour.clear();
         for (Map.Entry<String, Object> monthEntry : testMon.entrySet()) {
-            if(monthEntry.getKey().equals(selectedMonth)) {
+            if (monthEntry.getKey().equals(selectedMonth)) {
                 testDay = (Map<String, Object>) monthEntry.getValue();
             }
         }
@@ -330,14 +394,20 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             Log.e(TAG, "setDaySpinner: Oops something went wrong.....NPE");
         }
         Collections.sort(fileListSelectDay);
-        spinnerSelectDay.setSelection(0);
         adapterSelectDay.notifyDataSetChanged();
+        if (!spinnerSelectDay.isSelected()) {
+//                    TODO : remove below log
+            Log.d(TAG, "onDataChange: it goes or not....");
+            spinnerSelectDay.setSelection(0, false);
+            setHourSpinner(spinnerSelectDay.getSelectedItem().toString());
+        }
     }
 
     private void setHourSpinner(String selectedDay) {
         adapterSelectHour.clear();
+        fileListSelectHour.clear();
         for (Map.Entry<String, Object> dayEntry : testDay.entrySet()) {
-            if(dayEntry.getKey().equals(selectedDay)) {
+            if (dayEntry.getKey().equals(selectedDay)) {
                 testHour = (Map<String, Object>) dayEntry.getValue();
             }
         }
@@ -352,14 +422,20 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             Log.e(TAG, "setHourSpinner: Oops something went wrong.....NPE");
         }
         Collections.sort(fileListSelectHour);
-        spinnerSelectHour.setSelection(0);
         adapterSelectHour.notifyDataSetChanged();
+        if (!spinnerSelectHour.isSelected()) {
+//                    TODO : remove below log
+            Log.d(TAG, "onDataChange: it goes or not....");
+            spinnerSelectHour.setSelection(0, false);
+            setFileDetailsSpinner(spinnerSelectHour.getSelectedItem().toString());
+        }
     }
 
     private void setFileDetailsSpinner(String selectedHour) {
         adapterSelectFileType.clear();
+        fileListSelectFileType.clear();
         for (Map.Entry<String, Object> hourEntry : testHour.entrySet()) {
-            if(hourEntry.getKey().equals(selectedHour)) {
+            if (hourEntry.getKey().equals(selectedHour)) {
                 testDetails = (Map<String, Object>) hourEntry.getValue();
             }
         }
@@ -380,7 +456,18 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             Log.e(TAG, "setFileDetailsSpinner: Oops something went wrong.....NPE");
         }
         Collections.sort(fileListSelectFileType);
-        spinnerSelectFileType.setSelection(0);
         adapterSelectFileType.notifyDataSetChanged();
+        if (!spinnerSelectFileType.isSelected()) {
+//                    TODO : remove below log
+            Log.d(TAG, "onDataChange: it goes or not....");
+            spinnerSelectFileType.setSelection(0, false);
+            enableButtons();
+        }
+    }
+
+    private void enableButtons() {
+        findViewById(R.id.button_download_file).setEnabled(true);
+        findViewById(R.id.button_download_file_2).setEnabled(true);
+        Log.d(TAG, "onItemSelected: " + spinnerSelectFileType.getSelectedItem().toString());
     }
 }

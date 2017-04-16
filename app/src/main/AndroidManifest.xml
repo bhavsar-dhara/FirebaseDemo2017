@@ -47,10 +47,7 @@
 
         <activity android:name=".ViewFilesListActivity" />
         <!-- TODO : remove the below four methods -->
-        <activity android:name=".SelectHourActivity" />
-        <activity android:name=".SelectYearActivity" />
-        <activity android:name=".SelectMonthActivity" />
-        <activity android:name=".SelectDayActivity" />
+
         <activity android:name=".ViewFileDirActivity"
             android:screenOrientation="portrait" />
     </application>

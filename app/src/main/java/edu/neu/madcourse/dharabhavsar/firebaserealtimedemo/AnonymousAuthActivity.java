@@ -189,8 +189,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
     }
 
     private void viewFileListActivity2() {
-        Intent i = new Intent(this, SelectYearActivity.class);
-        startActivity(i);
+
     }
 
     private void viewFileListActivity3() {
