@@ -220,19 +220,20 @@ public class Graph2Activity extends BaseActivity {
         String line;
         try {
             int c = 0;
+            String[] parts;
             while ((line = bufferReader.readLine()) != null) {
-                String[] parts = line.split(",");
+                parts = line.split(",");
                 if (c > 0) {
                     seriesX.add(milliSecond, Double.parseDouble(parts[1]));
                     seriesY.add(milliSecond, Double.parseDouble(parts[2]));
                     seriesZ.add(milliSecond, Double.parseDouble(parts[3]));
                 }
-                if (c == 40000) // c is used to plot upto first 10000 points
+                if (c == 40000) // c is used to plot upto first 40000 points
                     break;
                 else
                     c++;
                 milliSecond++;
-                c++;
+//                c++;
             }
             plotAccGraph();
         } catch (IOException e) {

@@ -48,8 +48,10 @@
         <activity android:name=".ViewFilesListActivity" />
         <!-- TODO : remove the below four methods -->
 
-        <activity android:name=".ViewFileDirActivity"
+        <activity
+            android:name=".ViewFileDirActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".ReadPlotLabelActivity"></activity>
     </application>
 
 </manifest>
