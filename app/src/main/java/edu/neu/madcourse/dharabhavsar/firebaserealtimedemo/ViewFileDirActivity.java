@@ -27,6 +27,7 @@ import java.util.Map;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.model.AnnotatedFileDetails;
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.utils.ConnectToFirebaseDatabase;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
@@ -91,7 +92,7 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             }
         }, intentFilter);
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseDatabase database = ConnectToFirebaseDatabase.instance(getApplicationContext());
         myRef = database.getReference();
 
         findViewById(R.id.button_download_file).setOnClickListener(this);

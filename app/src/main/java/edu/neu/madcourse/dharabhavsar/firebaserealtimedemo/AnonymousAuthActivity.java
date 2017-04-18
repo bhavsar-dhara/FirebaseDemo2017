@@ -35,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.utils.ConnectToFirebaseAuth;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
@@ -75,7 +76,7 @@ public class AnonymousAuthActivity extends BaseActivity implements
         }, intentFilter);
 
         // [START initialize_auth]
-        mAuth = FirebaseAuth.getInstance();
+        mAuth = ConnectToFirebaseAuth.instance(getApplicationContext());
         // [END initialize_auth]
 
         // [START auth_state_listener]

@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.utils.ConnectToFirebaseStorage;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
@@ -88,11 +89,10 @@ public class Graph2Activity extends BaseActivity {
         chart = (LinearLayout) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
 
-        storage = FirebaseStorage.getInstance();
+        storage = ConnectToFirebaseStorage.instance(getApplicationContext());
 
         // Create a storage reference from our app
-        storageRef = storage.getReferenceFromUrl("gs://testapp-102e7.appspot.com");
-//        storageRef = storage.getReference();
+        storageRef = storage.getReference();
 
         // STEP-2 ::: Method to download the file from the Firebase Storage
         downloadFile(fileName);
@@ -117,7 +117,7 @@ public class Graph2Activity extends BaseActivity {
         if (stringRef == null) {
             return;
         }
-        storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(stringRef);
+        storageRef = ConnectToFirebaseStorage.instance(getApplicationContext()).getReferenceFromUrl(stringRef);
 
         // Find all DownloadTasks under this StorageReference (in this example, there should be one)
         List<FileDownloadTask> tasks = storageRef.getActiveDownloadTasks();

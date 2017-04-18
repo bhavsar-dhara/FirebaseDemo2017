@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
+import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.utils.ConnectToFirebaseDatabase;
 
 import static edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver.IS_NETWORK_AVAILABLE;
 
@@ -59,7 +60,7 @@ public class ViewFilesListActivity extends AppCompatActivity implements AdapterV
             }
         }, intentFilter);
 
-        database = FirebaseDatabase.getInstance();
+        database = ConnectToFirebaseDatabase.instance(getApplicationContext());
         myRef = database.getReference();
 
         findViewById(R.id.button_download_file).setOnClickListener(this);
