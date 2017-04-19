@@ -8,4 +8,4 @@ Demo to connect to Firebase Storage to select a particular .csv.gz file, fetch a
 > 3. You will need to copy paste the **utils** package to make the connection possible to this hosting Firebase Storage, Database and Auth.
 
 
-[Detail Document](https://docs.google.com/a/husky.neu.edu/document/d/13L9Upy_eWb6_1I3X2nJDx-MKMjQGcv-p0p7iYgIwCoQ/edit?usp=sharing)
+[Updated Details Document](https://docs.google.com/a/husky.neu.edu/document/d/13L9Upy_eWb6_1I3X2nJDx-MKMjQGcv-p0p7iYgIwCoQ/edit?usp=sharing)
