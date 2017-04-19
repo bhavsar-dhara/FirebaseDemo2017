@@ -47,9 +47,6 @@ public class GraphActivity extends BaseActivity {
 
     private static final int SAMPLING_RATE = 300000; // based on 80Hz sampling rate data generated
 
-    private String INPUT_GZIP_FILE;
-
-    private FirebaseStorage storage;
     private StorageReference storageRef;
 
     private GraphView chartLyt;
@@ -100,7 +97,7 @@ public class GraphActivity extends BaseActivity {
         Arrays.fill(doubleY, 0.0d);
         Arrays.fill(doubleZ, 0.0d);
 
-        storage = ConnectToFirebaseStorage.instance(getApplicationContext());
+        FirebaseStorage storage = ConnectToFirebaseStorage.instance(getApplicationContext());
 
         // Create a storage reference from our app
         storageRef = storage.getReference();
@@ -202,7 +199,7 @@ public class GraphActivity extends BaseActivity {
     STEP-3 ::: Method to unzip the downloaded file
      */
     private void unzipFile(String path, String zipName) {
-        INPUT_GZIP_FILE = path + "/" + zipName;
+        String INPUT_GZIP_FILE = path + "/" + zipName;
 
         InputStream fis;
         GZIPInputStream gis;

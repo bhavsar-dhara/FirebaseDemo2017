@@ -256,10 +256,10 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             startActivity(i);
         } else {
             Log.d(TAG, "openDownloadFileActivity: reading annotated....");
-//            Intent i = new Intent(this,. class);
-//            Log.d(TAG, "openDownloadFileActivity: " + fileName);
-//            i.putExtra("FileName", fileName);
-//            startActivity(i);
+            Intent i = new Intent(this, ReadPlotLabelActivity.class);
+            Log.d(TAG, "openDownloadFileActivity: " + fileName);
+            i.putExtra("FileName", fileName);
+            startActivity(i);
         }
     }
 
@@ -276,10 +276,10 @@ public class ViewFileDirActivity extends AppCompatActivity implements View.OnCli
             startActivity(i);
         } else {
             Log.d(TAG, "openDownloadFileActivity: reading annotated....");
-//            Intent i = new Intent(this,. class);
-//            Log.d(TAG, "openDownloadFileActivity: " + fileName);
-//            i.putExtra("FileName", fileName);
-//            startActivity(i);
+            Intent i = new Intent(this, ReadPlotLabelActivity.class);
+            Log.d(TAG, "openDownloadFileActivity: " + fileName);
+            i.putExtra("FileName", fileName);
+            startActivity(i);
         }
     }
 

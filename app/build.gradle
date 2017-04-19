@@ -29,6 +29,9 @@ dependencies {
         exclude group: 'commons-logging', module: 'commons-logging'
     }
 
+//    https://www.scichart.com/android-chart-features/ --> in future
+    compile 'com.github.lecho:hellocharts-android:v1.5.8'
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     compile 'com.jjoe64:graphview:4.2.1'
     compile 'org.achartengine:achartengine:1.2.0'
     compile 'com.univocity:univocity-parsers:2.4.1'

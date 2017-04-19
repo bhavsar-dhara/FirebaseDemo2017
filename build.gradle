@@ -26,6 +26,10 @@ allprojects {
         maven {
             url "https://repository-achartengine.forge.cloudbees.com/snapshot/"
         }
+        maven {
+            url "https://jitpack.io"
+        }
+
     }
 }
 

@@ -48,9 +48,6 @@ public class Graph2Activity extends BaseActivity {
 
     private static final String TAG = Graph2Activity.class.getSimpleName();
 
-    String INPUT_GZIP_FILE;
-
-    FirebaseStorage storage;
     StorageReference storageRef;
 
     LinearLayout chart;
@@ -89,7 +86,7 @@ public class Graph2Activity extends BaseActivity {
         chart = (LinearLayout) findViewById(R.id.chart);
         mProgressBarLayout = (LinearLayout) findViewById(R.id.progress_bar_layout);
 
-        storage = ConnectToFirebaseStorage.instance(getApplicationContext());
+        FirebaseStorage storage = ConnectToFirebaseStorage.instance(getApplicationContext());
 
         // Create a storage reference from our app
         storageRef = storage.getReference();
@@ -192,7 +189,7 @@ public class Graph2Activity extends BaseActivity {
     STEP-3 ::: Method to unzip the downloaded file
      */
     private void unzipFile(String path, String zipName) {
-        INPUT_GZIP_FILE = path + "/" + zipName;
+        String INPUT_GZIP_FILE = path + "/" + zipName;
 
         InputStream fis;
         GZIPInputStream gis;
