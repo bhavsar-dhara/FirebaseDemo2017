@@ -29,6 +29,19 @@
         android:layout_below="@+id/editText"
         android:layout_marginTop="17dp" />
 
+    <TextView
+        android:id="@+id/editTextYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:text="@string/select_year" />
+
     <Spinner
         android:id="@+id/spinnerSelectYear"
         android:layout_width="match_parent"
@@ -37,6 +50,19 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/spinnerSelectType"
         android:layout_marginTop="17dp" />
+
+    <TextView
+        android:id="@+id/editTextMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:text="@string/select_month" />
 
     <Spinner
         android:id="@+id/spinnerSelectMonth"
@@ -47,6 +73,19 @@
         android:layout_below="@+id/spinnerSelectYear"
         android:layout_marginTop="17dp" />
 
+    <TextView
+        android:id="@+id/editTextDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:text="@string/select_day" />
+
     <Spinner
         android:id="@+id/spinnerSelectDay"
         android:layout_width="match_parent"
@@ -56,6 +95,19 @@
         android:layout_below="@+id/spinnerSelectMonth"
         android:layout_marginTop="17dp" />
 
+    <TextView
+        android:id="@+id/editTextHour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:text="@string/select_hour" />
+
     <Spinner
         android:id="@+id/spinnerSelectHour"
         android:layout_width="match_parent"
@@ -64,6 +116,19 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/spinnerSelectDay"
         android:layout_marginTop="17dp" />
+
+    <TextView
+        android:id="@+id/editTextFileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:text="@string/select_fileName" />
 
     <Spinner
         android:id="@+id/spinnerSelectFileType"
