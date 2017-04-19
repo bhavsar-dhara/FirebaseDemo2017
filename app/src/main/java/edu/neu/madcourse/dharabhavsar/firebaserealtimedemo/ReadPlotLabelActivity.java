@@ -84,9 +84,9 @@ public class ReadPlotLabelActivity extends AppCompatActivity {
                 String networkStatus = isNetworkAvailable ? "connected" : "disconnected";
 
                 if (networkStatus.equals("connected")) {
-                    Snackbar.make(findViewById(R.id.activity_main), "Network Status: " + networkStatus, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(findViewById(R.id.container), "Network Status: " + networkStatus, Snackbar.LENGTH_LONG).show();
                 } else {
-                    Snackbar.make(findViewById(R.id.activity_main), "Network Status: " + networkStatus, Snackbar.LENGTH_INDEFINITE).show();
+                    Snackbar.make(findViewById(R.id.container), "Network Status: " + networkStatus, Snackbar.LENGTH_INDEFINITE).show();
                 }
             }
         }, intentFilter);
