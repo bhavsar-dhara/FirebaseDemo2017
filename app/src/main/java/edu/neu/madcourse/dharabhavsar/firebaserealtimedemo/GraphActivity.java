@@ -66,7 +66,6 @@ public class GraphActivity extends BaseActivity {
     private Double[] doubleXArr;
     private Double[] doubleYArr;
     private Double[] doubleZArr;
-    private Date[] dateArr;
 
     private double milliSecond = 0.01d;
     private DataPoint[] dataPointArrayX;
@@ -311,8 +310,8 @@ public class GraphActivity extends BaseActivity {
 
         // set manual X bounds
         chartLyt.getViewport().setXAxisBoundsManual(false);
-        chartLyt.getViewport().setMinX(1000);
-        chartLyt.getViewport().setMaxX(10000);
+        chartLyt.getViewport().setMinX(0);
+        chartLyt.getViewport().setMaxX(8000);
 
         // set manual X bounds
         chartLyt.getViewport().setYAxisBoundsManual(false);
@@ -331,7 +330,7 @@ public class GraphActivity extends BaseActivity {
                     // show time for x values
                     if (isValueX) {
                         // convert time to human time
-                        Date d = new Date((long) (value*1000));
+                        Date d = new Date((long) (value * 100));
                         return (dateFormat.format(d));
                     } else {
                         return super.formatLabel(value, isValueX);
@@ -342,6 +341,7 @@ public class GraphActivity extends BaseActivity {
                 }
             }
         });
+        chartLyt.getGridLabelRenderer().setHumanRounding(false);
 
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
 
@@ -355,6 +355,7 @@ public class GraphActivity extends BaseActivity {
     private void setSeriesData() {
         Log.e(TAG, "setSeriesData: len = " + counter);
 
+        dataPointArrayDate = new DataPoint[counter];
         dataPointArrayX = new DataPoint[counter];
         dataPointArrayY = new DataPoint[counter];
         dataPointArrayZ = new DataPoint[counter];
