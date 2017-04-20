@@ -19,6 +19,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
@@ -32,8 +33,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.BufferOverflowException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 
 import edu.neu.madcourse.dharabhavsar.firebaserealtimedemo.receiver.NetworkStateChangeReceiver;
@@ -56,15 +61,18 @@ public class GraphActivity extends BaseActivity {
     private Double[] doubleX = new Double[SAMPLING_RATE];
     private Double[] doubleY = new Double[SAMPLING_RATE];
     private Double[] doubleZ = new Double[SAMPLING_RATE];
+    private Date[] dates = new Date[SAMPLING_RATE];
 
     private Double[] doubleXArr;
     private Double[] doubleYArr;
     private Double[] doubleZArr;
+    private Date[] dateArr;
 
     private double milliSecond = 0.01d;
-    private DataPoint[] dataPointArrayX = new DataPoint[SAMPLING_RATE];
-    private DataPoint[] dataPointArrayY = new DataPoint[SAMPLING_RATE];
-    private DataPoint[] dataPointArrayZ = new DataPoint[SAMPLING_RATE];
+    private DataPoint[] dataPointArrayX;
+    private DataPoint[] dataPointArrayY;
+    private DataPoint[] dataPointArrayZ;
+    private DataPoint[] dataPointArrayDate;
     int counter = 0;
 
     @Override
@@ -225,6 +233,7 @@ public class GraphActivity extends BaseActivity {
      */
     private void parser(BufferedReader bufferReader) {
         String line;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US);
         try {
             String[] parts;
             while ((line = bufferReader.readLine()) != null) {
@@ -233,6 +242,7 @@ public class GraphActivity extends BaseActivity {
 //                    Log.d(TAG, "parser: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
 //                }
                 if (counter > 0) {
+                    dates[counter] = simpleDateFormat.parse(parts[0]);
                     doubleX[counter] = Double.parseDouble(parts[1]);
                     doubleY[counter] = Double.parseDouble(parts[2]);
                     doubleZ[counter] = Double.parseDouble(parts[3]);
@@ -250,7 +260,7 @@ public class GraphActivity extends BaseActivity {
             System.arraycopy(doubleZ, 0, doubleZArr, 0, counter);
 
             plotXAccGraph();
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
     }
@@ -312,6 +322,26 @@ public class GraphActivity extends BaseActivity {
         // enable scaling and scrolling
         chartLyt.getViewport().setScalable(true);
         chartLyt.getViewport().setScalableY(true);
+
+        chartLyt.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", Locale.US);
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                if (isValueX) {
+                    // show time for x values
+                    if (isValueX) {
+                        // convert time to human time
+                        Date d = new Date((long) (value*1000));
+                        return (dateFormat.format(d));
+                    } else {
+                        return super.formatLabel(value, isValueX);
+                    }
+                } else {
+                    // show normal y values
+                    return super.formatLabel(value, isValueX);
+                }
+            }
+        });
 
         Log.d(TAG, "plotXAccGraph: graphical chart view created");
 
