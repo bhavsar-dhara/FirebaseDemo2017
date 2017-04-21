@@ -63,15 +63,14 @@ public class GraphActivity extends BaseActivity {
     private Double[] doubleZ = new Double[SAMPLING_RATE];
     private Date[] dates = new Date[SAMPLING_RATE];
 
-    private Double[] doubleXArr;
-    private Double[] doubleYArr;
-    private Double[] doubleZArr;
+//    private Double[] doubleXArr;
+//    private Double[] doubleYArr;
+//    private Double[] doubleZArr;
 
     private double milliSecond = 0.01d;
     private DataPoint[] dataPointArrayX;
     private DataPoint[] dataPointArrayY;
     private DataPoint[] dataPointArrayZ;
-    private DataPoint[] dataPointArrayDate;
     int counter = 0;
 
     @Override
@@ -232,16 +231,20 @@ public class GraphActivity extends BaseActivity {
      */
     private void parser(BufferedReader bufferReader) {
         String line;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss", Locale.US);
         try {
             String[] parts;
             while ((line = bufferReader.readLine()) != null) {
                 parts = line.split(",");
+
 //                if (counter < 10) {
 //                    Log.d(TAG, "parser: ... " + parts[0] + " .... " + parts[1] + " ... " + parts[2] + " ... " + parts[3]);
 //                }
                 if (counter > 0) {
                     dates[counter] = simpleDateFormat.parse(parts[0]);
+                    if(counter == 1) {
+                        Log.e(TAG, "parser: dates[0] = " + dates[counter]);
+                    }
                     doubleX[counter] = Double.parseDouble(parts[1]);
                     doubleY[counter] = Double.parseDouble(parts[2]);
                     doubleZ[counter] = Double.parseDouble(parts[3]);
@@ -250,13 +253,13 @@ public class GraphActivity extends BaseActivity {
             }
 
             Log.e(TAG, "parser: counter  = " + counter);
-            doubleXArr = new Double[counter];
-            doubleYArr = new Double[counter];
-            doubleZArr = new Double[counter];
-
-            System.arraycopy(doubleX, 0, doubleXArr, 0, counter);
-            System.arraycopy(doubleY, 0, doubleYArr, 0, counter);
-            System.arraycopy(doubleZ, 0, doubleZArr, 0, counter);
+//            doubleXArr = new Double[counter];
+//            doubleYArr = new Double[counter];
+//            doubleZArr = new Double[counter];
+//
+//            System.arraycopy(doubleX, 0, doubleXArr, 0, counter);
+//            System.arraycopy(doubleY, 0, doubleYArr, 0, counter);
+//            System.arraycopy(doubleZ, 0, doubleZArr, 0, counter);
 
             plotXAccGraph();
         } catch (IOException | ParseException e) {
@@ -309,9 +312,14 @@ public class GraphActivity extends BaseActivity {
         chartLyt.setTitleColor(Color.BLACK);
 
         // set manual X bounds
-        chartLyt.getViewport().setXAxisBoundsManual(false);
-        chartLyt.getViewport().setMinX(0);
-        chartLyt.getViewport().setMaxX(8000);
+//        chartLyt.getViewport().setXAxisBoundsManual(false);
+        //chartLyt.getViewport().setMinX(0);
+        //chartLyt.getViewport().setMaxX(8000);
+        chartLyt.getViewport().setXAxisBoundsManual(true);
+        Log.d(TAG, "plotXAccGraph: dates[1].getTime() = " + dates[1].getTime());
+        Log.d(TAG, "plotXAccGraph: dates[counter - 1].getTime() = " + dates[counter - 1].getTime());
+        chartLyt.getViewport().setMinX(dates[1].getTime());
+        chartLyt.getViewport().setMaxX(dates[counter - 1].getTime());
 
         // set manual X bounds
         chartLyt.getViewport().setYAxisBoundsManual(false);
@@ -328,13 +336,9 @@ public class GraphActivity extends BaseActivity {
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
                     // show time for x values
-                    if (isValueX) {
-                        // convert time to human time
-                        Date d = new Date((long) (value * 100));
-                        return (dateFormat.format(d));
-                    } else {
-                        return super.formatLabel(value, isValueX);
-                    }
+//                    Date d = new Date((long) (value * 100));
+                    Date d = new Date((long) (value));
+                    return (dateFormat.format(d));
                 } else {
                     // show normal y values
                     return super.formatLabel(value, isValueX);
@@ -355,20 +359,34 @@ public class GraphActivity extends BaseActivity {
     private void setSeriesData() {
         Log.e(TAG, "setSeriesData: len = " + counter);
 
-        dataPointArrayDate = new DataPoint[counter];
-        dataPointArrayX = new DataPoint[counter];
-        dataPointArrayY = new DataPoint[counter];
-        dataPointArrayZ = new DataPoint[counter];
+        dataPointArrayX = new DataPoint[counter - 1];
+        dataPointArrayY = new DataPoint[counter - 1];
+        dataPointArrayZ = new DataPoint[counter - 1];
 
         for (int i = 0; i < counter ; i++) {
 //            Log.e(TAG, "setSeriesData: i = " + i + " .. " + doubleX[i] + " .. " + doubleX[i] + " .. " + doubleX[i] );
-            if (doubleX[i] != null)
-                dataPointArrayX[i] = new DataPoint(milliSecond, doubleXArr[i]);
-            if (doubleY[i] != null)
-                dataPointArrayY[i] = new DataPoint(milliSecond, doubleYArr[i]);
-            if (doubleZ[i] != null)
-                dataPointArrayZ[i] = new DataPoint(milliSecond, doubleZArr[i]);
-            milliSecond++;
+//            if(dates[i] != null) {
+                if(i == 1 || i == counter - 1) {
+                    Log.e(TAG, "setSeriesData: " + i + " = "+ dates[i]);
+                }
+                if (dates[i] != null && doubleX[i] != null) {
+                    dataPointArrayX[i - 1] = new DataPoint(dates[i], doubleX[i]);
+                }
+                if (dates[i] != null && doubleY[i] != null) {
+                    dataPointArrayY[i - 1] = new DataPoint(dates[i], doubleY[i]);
+                }
+                if (dates[i] != null && doubleZ[i] != null) {
+                    dataPointArrayZ[i - 1] = new DataPoint(dates[i], doubleZ[i]);
+                }
+//            } else {
+//                if (doubleX[i] != null)
+//                    dataPointArrayX[i] = new DataPoint(milliSecond, doubleXArr[i]);
+//                if (doubleY[i] != null)
+//                    dataPointArrayY[i] = new DataPoint(milliSecond, doubleYArr[i]);
+//                if (doubleZ[i] != null)
+//                    dataPointArrayZ[i] = new DataPoint(milliSecond, doubleZArr[i]);
+//                milliSecond++;
+//            }
         }
     }
 }
