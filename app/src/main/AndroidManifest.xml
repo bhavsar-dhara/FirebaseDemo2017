@@ -52,7 +52,6 @@
             android:name=".ViewFileDirActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".ReadPlotLabelActivity" />
-        <activity android:name=".Graph3Activity"></activity>
     </application>
 
 </manifest>
